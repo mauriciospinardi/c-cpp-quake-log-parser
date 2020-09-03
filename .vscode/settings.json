@@ -1,0 +1,11 @@
+{
+   "editor.insertSpaces": true,
+   "editor.tabSize": 4,
+   "files.encoding": "windows1252",
+   "files.trimTrailingWhitespace": false,
+   "terminal.integrated.shell.windows": "cmd.exe",
+   "terminal.integrated.shellArgs.windows": [
+      "/k",
+      "misc\\env.bat"
+   ]
+}

@@ -1,0 +1,24 @@
+{
+   "configurations": [
+      {
+         "name": "Win32",
+         "compilerPath": "C:/cygwin64/bin/gcc.exe",
+         "intelliSenseMode": "gcc-x64",
+         "includePath": [
+            "C:/cygwin64/**",
+            "${workspaceFolder}/**"
+         ],
+         "defines": [
+            "_DEBUG_",
+            "_PROJECT_NAME_=\"parser\"",
+            "_PROJECT_VERSION_=\"VV.vv.bb\""
+         ],
+         "cStandard": "c99",
+         "cppStandard": "c++11",
+         "browse": {
+            "limitSymbolsToIncludedHeaders": true
+         }
+      }
+   ],
+   "version": 4
+}
