@@ -19,7 +19,7 @@ consider the functional entry point of this repository. In this file, the
 highlight is the tools directory ```C:\cygwin64```.  
 
 The [Cygwin](https://www.cygwin.com) distribution provides all dependencies
-required in here:  
+required here:  
 
 - GNU Compiler Collection
 - The GNU version of the 'make' utility
@@ -76,7 +76,18 @@ T.B.D.
 
 ## Development notes
 
-T.B.D.  
+- Commit messages for this repository were written (and should always)
+  following the guidelines summary from
+  [robertpainsi](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53)
+  were applicable.
+- Source code was procedurally written in C (respecting, at most, the C99
+  standard).
+    - It's the most generic approach for embedded devices wich can deal with
+      C/C++ code (tough the target, in this case, is a regular PC).
+- Despite procedurally written, code has some characteristics usual to the
+  object oriented approach, as can be noticed by the prefixes in the public
+  API.
+    - \<"class"\>_\<"public method"\>
 
 ### Unit tests
 
