@@ -18,21 +18,15 @@
 
 typedef enum
 {
-    LOG_ERR_DEFAULT = PAR_ERR_NEXT,
-    LOG_ERR_INVALID_ARGUMENT,
+    LOG_ERR_DEFAULT = PAR_ERR_MARKER,
+    LOG_ERR_ALREADY_STARTED,
     LOG_ERR_FILE_EMPTY,
     LOG_ERR_FILE_NOT_FOUND,
+    LOG_ERR_INVALID_ARGUMENT,
     LOG_ERR_OUT_OF_MEMORY,
-    LOG_ERR_ALREADY_STARTED,
-    /* ... */
+    LOG_ERR_MARKER,
     LOG_SUCCESS = 0
 } EN_LOG_ERR;
-
-typedef struct
-{
-    char *file;
-    char *buffer;
-} ST_LOG;
 
 /********************/
 /* Public functions */
@@ -47,7 +41,7 @@ typedef struct
  * @return int LOG_SUCCESS or LOG_ERR_xxx
  */
 extern int
-LOG_import(const char *file, ST_LOG *log);
+LOG_import(const char *file, ST_PARSER *log);
 
 /**
  * @brief Initialization function.

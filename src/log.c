@@ -29,7 +29,7 @@ static int
 fsize(const char *file, long int *size);
 
 static int
-import(const char *file, ST_LOG *log);
+import(const char *file, ST_PARSER *log);
 
 /********************/
 /* Public functions */
@@ -44,7 +44,7 @@ import(const char *file, ST_LOG *log);
  * @return int LOG_SUCCESS or LOG_ERR_xxx
  */
 extern int API_PUBLIC
-LOG_import(const char *file, ST_LOG *log)
+LOG_import(const char *file, ST_PARSER *log)
 {
     int ret;
 
@@ -87,7 +87,7 @@ LOG_start(void)
 
 /**
  * @brief File size designator. Returns the file size.
- * Inherently not thread safe.
+ * Inherently not thread safe. Should be called only within import().
  * 
  * @param[in] file file name
  * @param[out] size file size
@@ -143,7 +143,7 @@ fsize(const char *file, long int *size)
  * @return int LOG_SUCCESS or LOG_ERR_xxx
  */
 static int
-import(const char *file, ST_LOG *log)
+import(const char *file, ST_PARSER *log)
 {
     FILE *fp;
     int ret;
