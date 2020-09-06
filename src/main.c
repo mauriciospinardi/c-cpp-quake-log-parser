@@ -34,7 +34,7 @@ terminate(const char *executable, int error);
  */
 int main(int argc, char *argv[])
 {
-    ST_LOG log;
+    ST_PARSER log;
     int ret;
 
     PARSER_TRACE("argc [%d] argv[0] [%s]", argc, argv[0]);
@@ -48,29 +48,29 @@ int main(int argc, char *argv[])
 
     if (argc <= 1)
     {
-        terminate(argv[0], PAR_ERR_INVALID_ARGUMENT);
+        terminate(argv[0], LOG_ERR_INVALID_ARGUMENT);
     }
 
-    // ret = PARSER_import(argv[1], &log);
+    ret = PARSER_import(argv[1], &log);
 
-    // if (ret)
-    // {
-    //     terminate(argv[0], ret);
-    // }
+    if (ret)
+    {
+        terminate(argv[0], ret);
+    }
 
-    // ret = PARSER_evaluate(&log);
+    ret = PARSER_evaluate(&log);
 
-    // if (ret)
-    // {
-    //     terminate(argv[0], ret);
-    // }
+    if (ret)
+    {
+        terminate(argv[0], ret);
+    }
 
-    // ret = PARSER_report(&log);
+    ret = PARSER_report(&log);
 
-    // if (ret)
-    // {
-    //     terminate(argv[0], ret);
-    // }
+    if (ret)
+    {
+        terminate(argv[0], ret);
+    }
 
     terminate(argv[0], 0);
 
@@ -90,23 +90,23 @@ int main(int argc, char *argv[])
 static void
 terminate(const char *executable, int error)
 {
-    printf("\nUsage: %s [file]", executable);
-    printf("\n    Error: %d", error);
-    printf("\n");
-
-    /* TODO: error translation */
-
-    /* (ex.)
-     * printf("\n    Error: [file] is missing");
-     * printf("\n")
-     */
-
     if (!error)
     {
         exit(EXIT_SUCCESS);
     }
     else
     {
+        printf("\nUsage: %s [file]", executable);
+        printf("\n    Error: %d", error);
+        printf("\n");
+
+        /* TODO: error translation */
+
+        /* (ex.)
+        * printf("\n    Error: [file] is missing");
+        * printf("\n")
+        */
+
         exit(EXIT_FAILURE);
     }
 }
