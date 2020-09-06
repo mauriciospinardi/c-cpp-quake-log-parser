@@ -20,9 +20,54 @@
 
 static sem_t semaphore;
 
+static sem_t trace;
+
 /********************/
 /* Public functions */
 /********************/
+
+/**
+ * @brief @ref parser.h
+ * 
+ * @param[in,out] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_evaluate(ST_PARSER *log)
+{
+    /* TODO: code */
+
+    (void) log;
+
+    return PAR_ERR_DEFAULT;
+}
+
+/**
+ * @brief @ref parser.h
+ *
+ * @param[in] file file name
+ * @param[out] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_import(const char *file, ST_PARSER *log)
+{
+    int ret;
+
+    PARSER_TRACE("*file [%s], log [%lu]", (file) ? file : "(null)", log);
+
+    sem_wait(&semaphore);
+
+    ret = LOG_import(file, log);
+
+    PARSER_TRACE("ret [%d]", ret);
+
+    sem_post(&semaphore);
+
+    return ret;
+}
 
 /**
  * @brief @ref parser.h
@@ -42,7 +87,7 @@ PARSER_log(const char *date, const char *time, const char *file, const int line,
         return;
     }
 
-    sem_wait(&semaphore);
+    sem_wait(&trace);
 
     va_start(args, format);
 
@@ -57,13 +102,30 @@ PARSER_log(const char *date, const char *time, const char *file, const int line,
 
     va_end(args);
 
-    sem_post(&semaphore);
+    sem_post(&trace);
 }
 
 /**
  * @brief @ref parser.h
  * 
- * @return int PARSER_SUCCESS or PARSER_ERR_xxx
+ * @param[in] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_report(ST_PARSER *log)
+{
+    /* TODO: code */
+
+    (void) log;
+
+    return PAR_ERR_DEFAULT;
+}
+
+/**
+ * @brief @ref parser.h
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
  */
 int
 PARSER_start(void)
@@ -81,6 +143,8 @@ PARSER_start(void)
     }
 
     sem_init(&semaphore, 0, 1);
+
+    sem_init(&trace, 0, 1);
 
     return PAR_SUCCESS;
 }

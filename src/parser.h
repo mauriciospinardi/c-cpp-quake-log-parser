@@ -33,17 +33,47 @@
 typedef enum
 {
     PAR_ERR_DEFAULT = -999,
-    PAR_ERR_INVALID_ARGUMENT,
-    PAR_ERR_OUT_OF_MEMORY,
     PAR_ERR_ALREADY_STARTED,
-    /* ... */
-    PAR_ERR_NEXT,
+    PAR_ERR_MARKER,
     PAR_SUCCESS = 0
 } EN_PAR_ERR;
+
+typedef struct
+{
+    char *buffer;
+    char *file;
+} ST_PARSER;
+
+/*******************/
+/* Public includes */
+/*******************/
+
+#include "log.h"
 
 /********************/
 /* Public functions */
 /********************/
+
+/**
+ * @description Evaluates the content of a previously loaded log file.
+ * 
+ * @param[in,out] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_evaluate(ST_PARSER *log);
+
+/**
+ * @description Log file importer.
+ *
+ * @param[in] file file name
+ * @param[out] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_import(const char *file, ST_PARSER *log);
 
 /**
  * @description Log channel.
@@ -55,17 +85,21 @@ extern void
 PARSER_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...);
 
 /**
- * @brief Initialization function.
+ * @description Creates a JSON report of a previously evaluated log file.
  * 
- * @return int PARSER_SUCCESS or PARSER_ERR_xxx
+ * @param[in] log log file structure
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
+ */
+extern int
+PARSER_report(ST_PARSER *log);
+
+/**
+ * @description Initialization function.
+ * 
+ * @return int PAR_SUCCESS or xxx_ERR_xxx
  */
 extern int
 PARSER_start(void);
-
-/***********************/
-/* Public dependencies */
-/***********************/
-
-#include "log.h"
 
 #endif /* #ifndef _PARSER_H_INCLUDED_ */
