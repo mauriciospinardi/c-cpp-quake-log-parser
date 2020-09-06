@@ -34,14 +34,43 @@ terminate(const char *executable, int error);
  */
 int main(int argc, char *argv[])
 {
-    PARSER_TRACE("argc [%d] argc[0] [%s]", argc, argv[0]);
+    ST_LOG log;
+    int ret;
+
+    PARSER_TRACE("argc [%d] argv[0] [%s]", argc, argv[0]);
+
+    ret = PARSER_start();
+
+    if (ret)
+    {
+        terminate(argv[0], PAR_ERR_DEFAULT);
+    }
 
     if (argc <= 1)
     {
-        terminate(argv[0], -1);
+        terminate(argv[0], PAR_ERR_INVALID_ARGUMENT);
     }
 
-    /* TODO: code */
+    // ret = PARSER_import(argv[1], &log);
+
+    // if (ret)
+    // {
+    //     terminate(argv[0], ret);
+    // }
+
+    // ret = PARSER_evaluate(&log);
+
+    // if (ret)
+    // {
+    //     terminate(argv[0], ret);
+    // }
+
+    // ret = PARSER_report(&log);
+
+    // if (ret)
+    // {
+    //     terminate(argv[0], ret);
+    // }
 
     terminate(argv[0], 0);
 
@@ -62,6 +91,7 @@ static void
 terminate(const char *executable, int error)
 {
     printf("\nUsage: %s [file]", executable);
+    printf("\n    Error: %d", error);
     printf("\n");
 
     /* TODO: error translation */
