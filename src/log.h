@@ -10,43 +10,47 @@
 #ifndef _LOG_H_INCLUDED_
 #define _LOG_H_INCLUDED_
 
-#include "parser.h"
+#include "utilities.h"
 
 /********************/
 /* Type definitions */
 /********************/
 
-typedef enum
+typedef struct LOG
 {
-    LOG_ERR_DEFAULT = PAR_ERR_MARKER,
-    LOG_ERR_ALREADY_STARTED,
-    LOG_ERR_FILE_EMPTY,
-    LOG_ERR_FILE_NOT_FOUND,
-    LOG_ERR_INVALID_ARGUMENT,
-    LOG_ERR_OUT_OF_MEMORY,
-    LOG_ERR_MARKER,
-    LOG_SUCCESS = 0
-} EN_LOG_ERR;
+    char *buffer;
+    char *file;
+} ST_LOG;
 
 /********************/
 /* Public functions */
 /********************/
 
 /**
+ * @description Evaluates the content of a previously loaded log file.
+ * 
+ * @param[in,out] data log file structure
+ * 
+ * @return int ERR_xxx
+ */
+extern int
+LOG_evaluate(ST_LOG *data);
+
+/**
  * @brief Log file importer.
  *
  * @param[in] file file name
- * @param[out] log log file structure
+ * @param[out] data log file structure
  * 
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @return int ERR_NONE or ERR_xxx
  */
 extern int
-LOG_import(const char *file, ST_PARSER *log);
+LOG_import(const char *file, ST_LOG *data);
 
 /**
  * @brief Initialization function.
  *
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @return int ERR_NONE or ERR_xxx
  */
 extern int
 LOG_start(void);

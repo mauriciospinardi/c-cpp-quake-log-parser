@@ -2,7 +2,7 @@
  * @file parser.c
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief Main Quake Log Parser API.
+ * @brief PARSER public API.
  * @date 2020-09-03
  * 
  */
@@ -13,14 +13,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /********************/
 /* Global variables */
 /********************/
 
 static sem_t semaphore;
-
-static sem_t trace;
 
 /********************/
 /* Public functions */
@@ -29,40 +28,58 @@ static sem_t trace;
 /**
  * @brief @ref parser.h
  * 
- * @param[in,out] log log file structure
+ * @param[in,out] data log file structure
  * 
- * @return int PAR_SUCCESS or xxx_ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
-PARSER_evaluate(ST_PARSER *log)
+PARSER_evaluate(ST_PARSER *data)
 {
-    /* TODO: code */
+    int ret;
 
-    (void) log;
+    APPLICATION_TRACE("data [%lu]", data);
 
-    return PAR_ERR_DEFAULT;
+    sem_wait(&semaphore);
+
+    ret = ERR_INVALID_ARGUMENT;
+
+    if (data)
+    {
+        ret = LOG_evaluate(&data->log);
+    }
+
+    APPLICATION_TRACE("ret [%d]", ret);
+
+    sem_post(&semaphore);
+
+    return ret;
 }
 
 /**
  * @brief @ref parser.h
  *
  * @param[in] file file name
- * @param[out] log log file structure
+ * @param[out] data log file structure
  * 
- * @return int PAR_SUCCESS or xxx_ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
-PARSER_import(const char *file, ST_PARSER *log)
+PARSER_import(const char *file, ST_PARSER *data)
 {
     int ret;
 
-    PARSER_TRACE("*file [%s], log [%lu]", (file) ? file : "(null)", log);
+    APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
 
     sem_wait(&semaphore);
 
-    ret = LOG_import(file, log);
+    ret = ERR_INVALID_ARGUMENT;
 
-    PARSER_TRACE("ret [%d]", ret);
+    if (data)
+    {
+        ret = LOG_import(file, &data->log);
+    }
+
+    APPLICATION_TRACE("ret [%d]", ret);
 
     sem_post(&semaphore);
 
@@ -72,79 +89,47 @@ PARSER_import(const char *file, ST_PARSER *log)
 /**
  * @brief @ref parser.h
  * 
- * @param[in] format autodescriptive
- * @param[in] ... variable number of arguments
- */
-extern void API_PUBLIC
-PARSER_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...)
-{
-    char log[256];
-    int ret;
-    va_list args;
-
-    if (!format)
-    {
-        return;
-    }
-
-    sem_wait(&trace);
-
-    va_start(args, format);
-
-    printf("\r\n[DEBUG] %11.11s %8.8s %.17s #%.4d %s::", date, time, file, line, function);
-
-    ret = vsnprintf(log, sizeof(log), format, args);
-
-    if (ret)
-    {
-        printf("%s", log);
-    }
-
-    va_end(args);
-
-    sem_post(&trace);
-}
-
-/**
- * @brief @ref parser.h
+ * @param[in] data log file structure
  * 
- * @param[in] log log file structure
- * 
- * @return int PAR_SUCCESS or xxx_ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
-PARSER_report(ST_PARSER *log)
+PARSER_report(ST_PARSER *data)
 {
-    /* TODO: code */
 
-    (void) log;
+#warning TODO: PARSER_report()
 
-    return PAR_ERR_DEFAULT;
+    (void) data;
+
+    return ERR_DEFAULT;
 }
 
 /**
  * @brief @ref parser.h
  * 
- * @return int PAR_SUCCESS or xxx_ERR_xxx
+ * @return int ERR_xxx
  */
-int
+extern int
 PARSER_start(void)
 {
     static int start = -1;
 
     if (!start)
     {
-        return PAR_ERR_ALREADY_STARTED;
+        return ERR_ALREADY_STARTED;
+    }
+
+    if (UTILITIES_start())
+    {
+        return ERR_DEFAULT;
     }
 
     if (LOG_start())
     {
-        return PAR_ERR_DEFAULT;
+        return ERR_DEFAULT;
     }
 
     sem_init(&semaphore, 0, 1);
 
-    sem_init(&trace, 0, 1);
-
-    return PAR_SUCCESS;
+    return ERR_NONE;
 }

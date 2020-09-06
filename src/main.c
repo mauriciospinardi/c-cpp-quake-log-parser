@@ -34,47 +34,45 @@ terminate(const char *executable, int error);
  */
 int main(int argc, char *argv[])
 {
-    ST_PARSER log;
+    ST_PARSER data;
     int ret;
-
-    PARSER_TRACE("argc [%d] argv[0] [%s]", argc, argv[0]);
 
     ret = PARSER_start();
 
     if (ret)
     {
-        terminate(argv[0], PAR_ERR_DEFAULT);
+        terminate(argv[0], ERR_DEFAULT);
     }
+
+    APPLICATION_TRACE("argc [%d] argv[0] [%s]", argc, argv[0]);
 
     if (argc <= 1)
     {
-        terminate(argv[0], LOG_ERR_INVALID_ARGUMENT);
+        terminate(argv[0], ERR_INVALID_ARGUMENT);
     }
 
-    ret = PARSER_import(argv[1], &log);
+    ret = PARSER_import(argv[1], &data);
 
     if (ret)
     {
         terminate(argv[0], ret);
     }
 
-    ret = PARSER_evaluate(&log);
+    ret = PARSER_evaluate(&data);
 
     if (ret)
     {
         terminate(argv[0], ret);
     }
 
-    ret = PARSER_report(&log);
+    ret = PARSER_report(&data);
 
     if (ret)
     {
         terminate(argv[0], ret);
     }
 
-    terminate(argv[0], 0);
-
-    return EXIT_FAILURE; /* Should never hit this line! */
+    return EXIT_SUCCESS;
 }
 
 /*********************/

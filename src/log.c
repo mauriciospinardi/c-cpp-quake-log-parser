@@ -15,6 +15,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**********/
+/* Macros */
+/**********/
+
+#define PARSER_KEY_MATCH "InitGame:"
+
 /********************/
 /* Global variables */
 /********************/
@@ -26,10 +32,13 @@ static sem_t semaphore;
 /***********************/
 
 static int
+evaluate(ST_LOG *data);
+
+static int
 fsize(const char *file, long int *size);
 
 static int
-import(const char *file, ST_PARSER *log);
+import(const char *file, ST_LOG *data);
 
 /********************/
 /* Public functions */
@@ -38,23 +47,27 @@ import(const char *file, ST_PARSER *log);
 /**
  * @brief @ref log.h
  * 
- * @param[in] file file name
- * @param[out] log log file structure
+ * @param[in,out] data log file structure
  * 
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @return int ERR_xxx
  */
-extern int API_PUBLIC
-LOG_import(const char *file, ST_PARSER *log)
+extern int
+LOG_evaluate(ST_LOG *data)
 {
     int ret;
 
-    PARSER_TRACE("*file [%s], log [%lu]", (file) ? file : "(null)", log);
+    APPLICATION_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
-    ret = import(file, log);
+    ret = ERR_INVALID_ARGUMENT;
 
-    PARSER_TRACE("ret [%d]", ret);
+    if (data)
+    {
+        ret = evaluate(data);
+    }
+
+    APPLICATION_TRACE("ret [%d]", ret);
 
     sem_post(&semaphore);
 
@@ -64,26 +77,120 @@ LOG_import(const char *file, ST_PARSER *log)
 /**
  * @brief @ref log.h
  * 
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @param[in] file file name
+ * @param[out] data log file structure
+ * 
+ * @return int ERR_NONE or ERR_xxx
  */
-int
+extern int
+LOG_import(const char *file, ST_LOG *data)
+{
+    int ret;
+
+    APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
+
+    sem_wait(&semaphore);
+
+    ret = import(file, data);
+
+    APPLICATION_TRACE("ret [%d]", ret);
+
+    sem_post(&semaphore);
+
+    return ret;
+}
+
+/**
+ * @brief @ref log.h
+ * 
+ * @return int ERR_NONE or ERR_xxx
+ */
+extern int
 LOG_start(void)
 {
     static int start = -1;
 
     if (!start)
     {
-        return LOG_ERR_ALREADY_STARTED;
+        return ERR_ALREADY_STARTED;
     }
 
     sem_init(&semaphore, 0, 1);
 
-    return LOG_SUCCESS;
+    return ERR_NONE;
 }
 
 /*********************/
 /* Private functions */
 /*********************/
+
+/**
+ * @brief @ref LOG_evaluate()
+ * 
+ * @param[in,out] data log file structure
+ * 
+ * @return int ERR_xxx
+ */
+static int
+evaluate(ST_LOG *data)
+{
+    char *begin;
+    char *end;
+    unsigned long long size;
+
+    if (!data)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!data->file || !data->buffer)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    begin = data->buffer;
+
+    while (begin)
+    {
+        begin = strstr(begin, PARSER_KEY_MATCH);
+
+        if (!begin)
+        {
+            break;
+        }
+
+        end = strstr(begin + strlen(PARSER_KEY_MATCH), PARSER_KEY_MATCH);
+
+        if (!end)
+        {
+            end = begin;
+        }
+
+        size = strlen(begin) - strlen(end);
+
+        if (!size)
+        {
+            size = strlen(begin);
+        }
+
+#warning TODO: MATCH_import()
+
+        if (begin != end)
+        {
+            begin = end;
+        }
+        else
+        {
+            begin = NULL; /* EOF */
+        }
+    }
+
+#warning TODO: validate match parsing
+
+    (void) data;
+
+    return ERR_DEFAULT;
+}
 
 /**
  * @brief File size designator. Returns the file size.
@@ -92,7 +199,7 @@ LOG_start(void)
  * @param[in] file file name
  * @param[out] size file size
  * 
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @return int ERR_NONE or ERR_xxx
  */
 static int
 fsize(const char *file, long int *size)
@@ -101,7 +208,7 @@ fsize(const char *file, long int *size)
 
     if (!file || !size)
     {
-        return LOG_ERR_INVALID_ARGUMENT;
+        return ERR_INVALID_ARGUMENT;
     }
 
     fp = fopen(file, "r");
@@ -111,10 +218,10 @@ fsize(const char *file, long int *size)
         switch (errno)
         {
         case ENOENT:
-            return LOG_ERR_FILE_NOT_FOUND;
+            return ERR_FILE_NOT_FOUND;
 
         default:
-            return LOG_ERR_DEFAULT;
+            return ERR_DEFAULT;
         }
     }
 
@@ -128,42 +235,42 @@ fsize(const char *file, long int *size)
 
     if (*size < 0)
     {
-        return LOG_ERR_DEFAULT;
+        return ERR_DEFAULT;
     }
 
-    return LOG_SUCCESS;
+    return ERR_NONE;
 }
 
 /**
  * @brief @ref LOG_import()
  * 
  * @param[in] file file name
- * @param[out] log log file structure
+ * @param[out] data log file structure
  * 
- * @return int LOG_SUCCESS or LOG_ERR_xxx
+ * @return int ERR_NONE or ERR_xxx
  */
 static int
-import(const char *file, ST_PARSER *log)
+import(const char *file, ST_LOG *data)
 {
     FILE *fp;
     int ret;
     long int size;
 
-    if (!file || !log)
+    if (!file || !data)
     {
-        return LOG_ERR_INVALID_ARGUMENT;
+        return ERR_INVALID_ARGUMENT;
     }
 
-    log->file = (char *) malloc(sizeof(char) * (strlen(file) + 1));
+    data->file = (char *) malloc(sizeof(char) * (strlen(file) + 1));
 
-    if (!log->file)
+    if (!data->file)
     {
-        return LOG_ERR_OUT_OF_MEMORY;
+        return ERR_OUT_OF_MEMORY;
     }
 
-    strcpy(log->file, file);
+    strcpy(data->file, file);
 
-    ret = fsize(log->file, &size);
+    ret = fsize(data->file, &size);
 
     if (ret)
     {
@@ -172,40 +279,40 @@ import(const char *file, ST_PARSER *log)
 
     if (!size)
     {
-        return LOG_ERR_FILE_EMPTY;
+        return ERR_FILE_EMPTY;
     }
 
-    log->buffer = (char *) malloc(sizeof(char) * (size + 1));
+    data->buffer = (char *) malloc(sizeof(char) * (size + 1));
 
-    if (!log->buffer)
+    if (!data->buffer)
     {
-        return LOG_ERR_OUT_OF_MEMORY;
+        return ERR_OUT_OF_MEMORY;
     }
 
-    fp = fopen(log->file, "r");
+    fp = fopen(data->file, "r");
 
     if (!fp)
     {
         switch (errno)
         {
         case ENOENT:
-            return LOG_ERR_FILE_NOT_FOUND;
+            return ERR_FILE_NOT_FOUND;
 
         default:
-            return LOG_ERR_DEFAULT;
+            return ERR_DEFAULT;
         }
     }
 
     fseek(fp, 0, SEEK_SET);
 
-    ret = fread(log->buffer, sizeof(char), size, fp);
+    ret = fread(data->buffer, sizeof(char), size, fp);
 
     fclose(fp);
 
     if (ret != size)
     {
-        return LOG_ERR_DEFAULT;
+        return ERR_DEFAULT;
     }
 
-    return LOG_SUCCESS;
+    return ERR_NONE;
 }
