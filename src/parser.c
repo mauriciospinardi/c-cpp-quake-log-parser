@@ -15,6 +15,12 @@
 #include <stdlib.h>
 
 /********************/
+/* Global variables */
+/********************/
+
+static sem_t semaphore;
+
+/********************/
 /* Public functions */
 /********************/
 
@@ -31,26 +37,12 @@ PARSER_log(const char *date, const char *time, const char *file, const int line,
     int ret;
     va_list args;
 
-    static sem_t *semaphore = NULL;
-
     if (!format)
     {
         return;
     }
 
-    if (!semaphore) /* Safe "enough", but not entirely */
-    {
-        semaphore = (sem_t *) malloc(sizeof(sem_t));
-
-        if (!semaphore)
-        {
-            return;
-        }
-
-        sem_init(semaphore, 0, 1);
-    }
-
-    sem_wait(semaphore);
+    sem_wait(&semaphore);
 
     va_start(args, format);
 
@@ -65,5 +57,30 @@ PARSER_log(const char *date, const char *time, const char *file, const int line,
 
     va_end(args);
 
-    sem_post(semaphore);
+    sem_post(&semaphore);
+}
+
+/**
+ * @brief @ref parser.h
+ * 
+ * @return int PARSER_SUCCESS or PARSER_ERR_xxx
+ */
+int
+PARSER_start(void)
+{
+    static int start = -1;
+
+    if (!start)
+    {
+        return PAR_ERR_ALREADY_STARTED;
+    }
+
+    if (LOG_start())
+    {
+        return PAR_ERR_DEFAULT;
+    }
+
+    sem_init(&semaphore, 0, 1);
+
+    return PAR_SUCCESS;
 }

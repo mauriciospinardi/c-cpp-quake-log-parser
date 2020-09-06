@@ -27,6 +27,21 @@
 #endif /* #ifdef _DEBUG_ */
 
 /********************/
+/* Type definitions */
+/********************/
+
+typedef enum
+{
+    PAR_ERR_DEFAULT = -999,
+    PAR_ERR_INVALID_ARGUMENT,
+    PAR_ERR_OUT_OF_MEMORY,
+    PAR_ERR_ALREADY_STARTED,
+    /* ... */
+    PAR_ERR_NEXT,
+    PAR_SUCCESS = 0
+} EN_PAR_ERR;
+
+/********************/
 /* Public functions */
 /********************/
 
@@ -38,6 +53,14 @@
  */
 extern void
 PARSER_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...);
+
+/**
+ * @brief Initialization function.
+ * 
+ * @return int PARSER_SUCCESS or PARSER_ERR_xxx
+ */
+extern int
+PARSER_start(void);
 
 /***********************/
 /* Public dependencies */
