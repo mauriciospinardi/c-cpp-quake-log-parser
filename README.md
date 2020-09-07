@@ -1,5 +1,8 @@
 # Hello from CloudWalk: Quake Log Parser
 
+> Truth can only be found in one place: the code. <br/>
+> -- Robert C. Martin
+
 ## Summary
 
 - [Development environment]()
