@@ -37,7 +37,7 @@ extern int
 LOG_evaluate(ST_LOG *data);
 
 /**
- * @brief Log file importer.
+ * @brief Imports a log file.
  *
  * @param[in] file file name
  * @param[out] data log file structure
@@ -48,7 +48,7 @@ extern int
 LOG_import(const char *file, ST_LOG *data);
 
 /**
- * @brief Initialization function.
+ * @brief Initializes the LOG API.
  *
  * @return int ERR_NONE or ERR_xxx
  */

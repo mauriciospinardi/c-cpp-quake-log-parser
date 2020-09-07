@@ -50,7 +50,7 @@ extern void
 UTILITIES_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...);
 
 /**
- * @description Initialization function.
+ * @description Initializes the UTILITIES API.
  * 
  * @return int ERR_xxx
  */

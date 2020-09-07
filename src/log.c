@@ -193,12 +193,11 @@ evaluate(ST_LOG *data)
 }
 
 /**
- * @brief File size designator. Returns the file size.
- * Inherently not thread safe. Should be called only within import().
- * 
+ * @brief Returns a file size. Inherently not thread safe.
+ *
  * @param[in] file file name
  * @param[out] size file size
- * 
+ *
  * @return int ERR_NONE or ERR_xxx
  */
 static int
