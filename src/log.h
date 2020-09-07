@@ -10,7 +10,7 @@
 #ifndef _LOG_H_INCLUDED_
 #define _LOG_H_INCLUDED_
 
-#include "utilities.h"
+#include "match.h"
 
 /********************/
 /* Type definitions */
@@ -18,6 +18,7 @@
 
 typedef struct LOG
 {
+    ST_MATCH *match;
     char *buffer;
     char *file;
 } ST_LOG;
@@ -27,7 +28,7 @@ typedef struct LOG
 /********************/
 
 /**
- * @description Evaluates the content of a previously loaded log file.
+ * @brief Evaluates the content of a previously imported log file.
  * 
  * @param[in,out] data log file structure
  * 

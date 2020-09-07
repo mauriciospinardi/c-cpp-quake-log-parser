@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 /*********************/
 
 /**
- * @description Show help and terminates execution.
+ * @brief Show help and terminates execution.
  * 
  * @param[in] executable current executable path (can be relative)
  * @param[in] error autodescriptive

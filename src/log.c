@@ -115,6 +115,11 @@ LOG_start(void)
         return ERR_ALREADY_STARTED;
     }
 
+    if (MATCH_start())
+    {
+        return ERR_DEFAULT;
+    }
+
     sem_init(&semaphore, 0, 1);
 
     return ERR_NONE;
@@ -134,9 +139,11 @@ LOG_start(void)
 static int
 evaluate(ST_LOG *data)
 {
+    ST_MATCH **match;
     char *begin;
     char *end;
-    unsigned long long size;
+    int ret;
+    unsigned long size;
 
     if (!data)
     {
@@ -147,6 +154,8 @@ evaluate(ST_LOG *data)
     {
         return ERR_INVALID_ARGUMENT;
     }
+
+    match = &data->match;
 
     begin = data->buffer;
 
@@ -173,7 +182,16 @@ evaluate(ST_LOG *data)
             size = strlen(begin);
         }
 
-#warning TODO: MATCH_import()
+        ret = MATCH_import(begin, size, match);
+
+        if (*match)
+        {
+            match = &(*match)->next;
+        }
+        else
+        {
+            return ERR_OUT_OF_MEMORY;
+        }
 
         if (begin != end)
         {
@@ -185,11 +203,26 @@ evaluate(ST_LOG *data)
         }
     }
 
-#warning TODO: validate match parsing
+    if (!data->match)
+    {
+        return ERR_MATCH_NOT_FOUND;
+    }
 
-    (void) data;
+    match = &data->match;
 
-    return ERR_DEFAULT;
+    while (*match)
+    {
+        ret = MATCH_evaluate(match);
+
+        if (ret)
+        {
+            return ret;
+        }
+
+        match = &(*match)->next;
+    }
+
+    return ERR_NONE;
 }
 
 /**
@@ -260,6 +293,8 @@ import(const char *file, ST_LOG *data)
         return ERR_INVALID_ARGUMENT;
     }
 
+    memset(data, 0, sizeof(ST_LOG));
+
     data->file = (char *) malloc(sizeof(char) * (strlen(file) + 1));
 
     if (!data->file)
@@ -273,11 +308,15 @@ import(const char *file, ST_LOG *data)
 
     if (ret)
     {
+        free(data->file);
+
         return ret;
     }
 
     if (!size)
     {
+        free(data->file);
+
         return ERR_FILE_EMPTY;
     }
 
@@ -285,6 +324,8 @@ import(const char *file, ST_LOG *data)
 
     if (!data->buffer)
     {
+        free(data->file); free(data->buffer);
+
         return ERR_OUT_OF_MEMORY;
     }
 
@@ -292,6 +333,8 @@ import(const char *file, ST_LOG *data)
 
     if (!fp)
     {
+        free(data->file); free(data->buffer);
+
         switch (errno)
         {
         case ENOENT:
@@ -310,7 +353,8 @@ import(const char *file, ST_LOG *data)
 
     if (ret != size)
     {
-        return ERR_DEFAULT;
+        return ERR_DEFAULT; /* Partial reading (in this case, memory is kept
+                             * allocated for further analysis) */
     }
 
     return ERR_NONE;

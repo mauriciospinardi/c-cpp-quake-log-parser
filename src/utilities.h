@@ -32,6 +32,7 @@ typedef enum
     ERR_FILE_NOT_FOUND,
     ERR_INVALID_ARGUMENT,
     ERR_OUT_OF_MEMORY,
+    ERR_MATCH_NOT_FOUND,
     /* ERR_MARKER */
     ERR_NONE = 0
 } EN_ERROR;
@@ -41,7 +42,7 @@ typedef enum
 /********************/
 
 /**
- * @description Log channel.
+ * @brief Log channel.
  * 
  * @param[in] format autodescriptive
  * @param[in] ... variable number of arguments
@@ -50,7 +51,7 @@ extern void
 UTILITIES_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...);
 
 /**
- * @description Initializes the UTILITIES API.
+ * @brief Initializes the UTILITIES API.
  * 
  * @return int ERR_xxx
  */
