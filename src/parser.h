@@ -11,7 +11,6 @@
 #define _PARSER_H_INCLUDED_
 
 #include "log.h"
-#include "utilities.h"
 
 /********************/
 /* Type definitions */
