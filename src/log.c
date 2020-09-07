@@ -341,7 +341,7 @@ import(const char *file, ST_LOG *data)
             return ERR_FILE_NOT_FOUND;
 
         default:
-            return ERR_DEFAULT;
+            return ERR_INVALID_ARGUMENT;
         }
     }
 
@@ -353,8 +353,7 @@ import(const char *file, ST_LOG *data)
 
     if (ret != size)
     {
-        return ERR_DEFAULT; /* Partial reading (in this case, memory is kept
-                             * allocated for further analysis) */
+        return ERR_DEFAULT; /* Partial reading (mem. is kept allocated for further analysis) */
     }
 
     return ERR_NONE;
