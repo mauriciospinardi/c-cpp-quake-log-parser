@@ -3,6 +3,8 @@
 > Truth can only be found in one place: the code. <br/>
 > -- Robert C. Martin
 
+Skills presentation for CloudWalk, Inc.  
+
 ## Summary
 
 - [Development environment]()
@@ -17,15 +19,16 @@
 
 ## Development environment
 
-File ```.\misc\env.bat``` defines the development environment and should be
-consider the functional entry point of this repository. In this file, the
-highlight is the tools directory ```C:\cygwin64```.  
+File ```.\misc\env.bat``` defines the development environment. Its highlight is
+the tools directory ```C:\cygwin64```.  
 
 The [Cygwin](https://www.cygwin.com) distribution provides all dependencies
 required here:  
 
 - GNU Compiler Collection
 - The GNU version of the 'make' utility
+
+This repository was created and tested under Windows 10 Pro 2004 19041.450.  
 
 ## Build
 
@@ -81,16 +84,15 @@ T.B.D.
 
 - Commit messages for this repository were written (and should always)
   following the guidelines summary from
-  [robertpainsi](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53)
-  were applicable.
-- Source code was procedurally written in C (respecting, at most, the C99
-  standard).
+  [robertpainsi](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53).
+- Source code was procedurally written in C (under the C99 standard).
     - It's the most generic approach for embedded devices wich can deal with
       C/C++ code (tough the target, in this case, is a regular PC).
 - Despite procedurally written, code has some characteristics usual to the
-  object oriented approach, as can be noticed by the prefixes in the public
-  API.
+  object oriented approach, as its hinted by the prefixes in the public API.
     - \<"class"\>_\<"public method"\>
+- cJSON data format handling happens through Dave Gamble's
+  [cJSON](github.com/DaveGamble/cJSON), under the MIT License.
 
 ### Unit tests
 
