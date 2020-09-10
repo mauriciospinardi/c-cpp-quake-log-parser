@@ -28,7 +28,7 @@ typedef struct
 /**
  * @brief Evaluates the content of a previously imported log file.
  * 
- * @param[in,out] data log file structure
+ * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
@@ -39,7 +39,7 @@ PARSER_evaluate(ST_PARSER *data);
  * @brief Imports a log file.
  *
  * @param[in] file file name
- * @param[out] data log file structure
+ * @param[out] data parser file structure
  * 
  * @return int ERR_xxx
  */
@@ -49,7 +49,7 @@ PARSER_import(const char *file, ST_PARSER *data);
 /**
  * @brief Creates a JSON report of a previously evaluated log file.
  * 
- * @param[in] data log file structure
+ * @param[in] data parser file structure
  * 
  * @return int ERR_xxx
  */

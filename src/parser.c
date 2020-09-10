@@ -15,10 +15,21 @@
 #include <string.h>
 
 /********************/
+/* Type definitions */
+/********************/
+
+/********************/
 /* Global variables */
 /********************/
 
 static sem_t semaphore;
+
+/***********************/
+/* Function prototypes */
+/***********************/
+
+static int
+report(ST_PARSER *data);
 
 /********************/
 /* Public functions */
@@ -27,7 +38,7 @@ static sem_t semaphore;
 /**
  * @brief @ref parser.h
  * 
- * @param[in,out] data log file structure
+ * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
@@ -58,7 +69,7 @@ PARSER_evaluate(ST_PARSER *data)
  * @brief @ref parser.h
  *
  * @param[in] file file name
- * @param[out] data log file structure
+ * @param[out] data parser file structure
  * 
  * @return int ERR_xxx
  */
@@ -88,19 +99,31 @@ PARSER_import(const char *file, ST_PARSER *data)
 /**
  * @brief @ref parser.h
  * 
- * @param[in] data log file structure
+ * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
 extern int
 PARSER_report(ST_PARSER *data)
 {
+    int retValue;
 
-#warning TODO: PARSER_report()
+    APPLICATION_TRACE("data [%lu]", data);
 
-    (void) data;
+    sem_wait(&semaphore);
 
-    return ERR_DEFAULT;
+    retValue = ERR_INVALID_ARGUMENT;
+
+    if (data)
+    {
+        retValue = report(data);
+    }
+
+    APPLICATION_TRACE("retValue [%d]", retValue);
+
+    sem_post(&semaphore);
+
+    return retValue;
 }
 
 /**
@@ -131,4 +154,26 @@ PARSER_start(void)
     sem_init(&semaphore, 0, 1);
 
     return ERR_NONE;
+}
+
+/*********************/
+/* Private functions */
+/*********************/
+
+/**
+ * @brief @ref PARSER_report()
+ * 
+ * @param[in,out] data parser file structure
+ * 
+ * @return int ERR_xxx
+ */
+static int
+report(ST_PARSER *data)
+{
+
+#warning TODO: PARSER_report()
+
+    (void) data;
+
+    return ERR_DEFAULT;
 }

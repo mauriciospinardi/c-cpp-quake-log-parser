@@ -16,7 +16,7 @@ endif
 ROOT_DIR := \
 $(subst \,/,$(ROOT_DIR))
 
-# Definições básicas
+# Basic definitions
 
 CFG_NAME := \
 $(if $(CFG_NAME),$(CFG_NAME),release)
@@ -37,7 +37,7 @@ DEF := \
 -D_PROJECT_NAME_="\"$(PROJECT_NAME)\"" \
 -D_PROJECT_VERSION_="\"$(PROJECT_VERSION)\""
 
-# Executáveis
+# Executables
 
 CC := \
 gcc
@@ -45,7 +45,7 @@ gcc
 CPP := \
 g++
 
-# Opções de compilação
+# Compiling options
 
 CFLAGS := \
 -O3
@@ -63,18 +63,26 @@ $(DEF) \
 -Wall \
 -Wextra
 
-# Opções de vinculação
+# Linking options
 
 LDFLAGS += \
 -Wl,-Map=$(BUILD_DIR)/$(PROJECT_NAME).map \
 -Wl,-rpath-link=./lib
 
-# Objetos de saída
+# Output objects
 
 OBJS := \
 $(patsubst src/%,$(BUILD_DIR)/%.o,$(wildcard src/*.c*))
 
-# Regras de compilação e instalação
+# (cJSON 1.7.14)
+
+cJSON := \
+src/cJSON/1.7.14
+
+OBJS += \
+$(patsubst $(cJSON)/cJSON.c,$(BUILD_DIR)/cJSON.c.o,$(wildcard $(cJSON)/cJSON.c))
+
+# Building rules
 
 .PHONY: all
 all:
@@ -93,6 +101,12 @@ $(BUILD_DIR)/%.c.o: src/%.c
 $(BUILD_DIR)/%.cpp.o: src/%.cpp
 	@echo - compiling with g++ $<...
 	@$(CPP) -std=c++11 $(CFLAGS) -c $< -o $@
+
+# (cJSON 1.7.14)
+
+$(BUILD_DIR)/%.c.o: $(cJSON)/%.c
+	@echo - compiling with gcc $<...
+	@$(CC) -std=c89 $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
