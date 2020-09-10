@@ -34,7 +34,7 @@ extern void
 UTILITIES_log(const char *date, const char *time, const char *file, const int line, const char *function, const char *format, ...)
 {
     char log[256];
-    int ret;
+    int retValue;
     va_list args;
 
     if (!format)
@@ -48,9 +48,9 @@ UTILITIES_log(const char *date, const char *time, const char *file, const int li
 
     printf("\r\n[DEBUG] %11.11s %8.8s %.17s #%.4d %s::", date, time, file, line, function);
 
-    ret = vsnprintf(log, sizeof(log), format, args);
+    retValue = vsnprintf(log, sizeof(log), format, args);
 
-    if (ret)
+    if (retValue)
     {
         printf("%s", log);
     }

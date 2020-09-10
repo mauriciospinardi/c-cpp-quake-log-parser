@@ -35,11 +35,11 @@ terminate(const char *executable, int error);
 int main(int argc, char *argv[])
 {
     ST_PARSER data;
-    int ret;
+    int retValue;
 
-    ret = PARSER_start();
+    retValue = PARSER_start();
 
-    if (ret)
+    if (retValue)
     {
         terminate(argv[0], ERR_DEFAULT);
     }
@@ -51,25 +51,25 @@ int main(int argc, char *argv[])
         terminate(argv[0], ERR_INVALID_ARGUMENT);
     }
 
-    ret = PARSER_import(argv[1], &data);
+    retValue = PARSER_import(argv[1], &data);
 
-    if (ret)
+    if (retValue)
     {
-        terminate(argv[0], ret);
+        terminate(argv[0], retValue);
     }
 
-    ret = PARSER_evaluate(&data);
+    retValue = PARSER_evaluate(&data);
 
-    if (ret)
+    if (retValue)
     {
-        terminate(argv[0], ret);
+        terminate(argv[0], retValue);
     }
 
-    ret = PARSER_report(&data);
+    retValue = PARSER_report(&data);
 
-    if (ret)
+    if (retValue)
     {
-        terminate(argv[0], ret);
+        terminate(argv[0], retValue);
     }
 
     return EXIT_SUCCESS;

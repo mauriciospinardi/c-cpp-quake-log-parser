@@ -2,7 +2,7 @@
  * @file log.c
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief LOG public API.
+ * @brief LOG API.
  * @date 2020-09-06
  * 
  */
@@ -35,7 +35,7 @@ static int
 evaluate(ST_LOG *data);
 
 static int
-fsize(const char *file, long int *size);
+fsize(const char *file, long int *fileSize);
 
 static int
 import(const char *file, ST_LOG *data);
@@ -54,24 +54,24 @@ import(const char *file, ST_LOG *data);
 extern int
 LOG_evaluate(ST_LOG *data)
 {
-    int ret;
+    int retValue;
 
     APPLICATION_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
-    ret = ERR_INVALID_ARGUMENT;
+    retValue = ERR_INVALID_ARGUMENT;
 
     if (data)
     {
-        ret = evaluate(data);
+        retValue = evaluate(data);
     }
 
-    APPLICATION_TRACE("ret [%d]", ret);
+    APPLICATION_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
-    return ret;
+    return retValue;
 }
 
 /**
@@ -85,19 +85,19 @@ LOG_evaluate(ST_LOG *data)
 extern int
 LOG_import(const char *file, ST_LOG *data)
 {
-    int ret;
+    int retValue;
 
     APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
 
     sem_wait(&semaphore);
 
-    ret = import(file, data);
+    retValue = import(file, data);
 
-    APPLICATION_TRACE("ret [%d]", ret);
+    APPLICATION_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
-    return ret;
+    return retValue;
 }
 
 /**
@@ -142,7 +142,7 @@ evaluate(ST_LOG *data)
     ST_MATCH **match;
     char *begin;
     char *end;
-    int ret;
+    int retValue;
     unsigned long size;
 
     if (!data)
@@ -182,16 +182,21 @@ evaluate(ST_LOG *data)
             size = strlen(begin);
         }
 
-        ret = MATCH_import(begin, size, match);
+        retValue = MATCH_import(begin, size, match);
 
-        if (*match)
+        if (retValue)
         {
-            match = &(*match)->next;
+            return retValue;
         }
-        else
+
+        retValue = MATCH_evaluate(match);
+
+        if (retValue)
         {
-            return ERR_OUT_OF_MEMORY;
+            return retValue;
         }
+
+        match = &(*match)->next;
 
         if (begin != end)
         {
@@ -203,49 +208,30 @@ evaluate(ST_LOG *data)
         }
     }
 
-    if (!data->match)
-    {
-        return ERR_MATCH_NOT_FOUND;
-    }
-
-    match = &data->match;
-
-    while (*match)
-    {
-        ret = MATCH_evaluate(match);
-
-        if (ret)
-        {
-            return ret;
-        }
-
-        match = &(*match)->next;
-    }
-
-    return ERR_NONE;
+    return (!data->match) ? ERR_MATCH_NOT_FOUND : ERR_NONE;
 }
 
 /**
  * @brief Returns a file size. Inherently not thread safe.
  *
  * @param[in] file file name
- * @param[out] size file size
+ * @param[out] fileSize file size
  *
  * @return int ERR_NONE or ERR_xxx
  */
 static int
-fsize(const char *file, long int *size)
+fsize(const char *file, long int *fileSize)
 {
-    FILE *fp;
+    FILE *filePointer;
 
-    if (!file || !size)
+    if (!file || !fileSize)
     {
         return ERR_INVALID_ARGUMENT;
     }
 
-    fp = fopen(file, "r");
+    filePointer = fopen(file, "r");
 
-    if (!fp)
+    if (!filePointer)
     {
         switch (errno)
         {
@@ -257,15 +243,15 @@ fsize(const char *file, long int *size)
         }
     }
 
-    fseek(fp, 0, SEEK_END);
+    fseek(filePointer, 0, SEEK_END);
 
-    *size = ftell(fp);
+    *fileSize = ftell(filePointer);
 
-    fseek(fp, 0, SEEK_SET);
+    fseek(filePointer, 0, SEEK_SET);
 
-    fclose(fp);
+    fclose(filePointer);
 
-    if (*size < 0)
+    if (*fileSize < 0)
     {
         return ERR_DEFAULT;
     }
@@ -284,9 +270,9 @@ fsize(const char *file, long int *size)
 static int
 import(const char *file, ST_LOG *data)
 {
-    FILE *fp;
-    int ret;
-    long int size;
+    FILE *filePointer;
+    int retValue;
+    long int fileSize;
 
     if (!file || !data)
     {
@@ -304,23 +290,23 @@ import(const char *file, ST_LOG *data)
 
     strcpy(data->file, file);
 
-    ret = fsize(data->file, &size);
+    retValue = fsize(data->file, &fileSize);
 
-    if (ret)
+    if (retValue)
     {
         free(data->file);
 
-        return ret;
+        return retValue;
     }
 
-    if (!size)
+    if (!fileSize)
     {
         free(data->file);
 
         return ERR_FILE_EMPTY;
     }
 
-    data->buffer = (char *) malloc(sizeof(char) * (size + 1));
+    data->buffer = (char *) malloc(sizeof(char) * (fileSize + 1));
 
     if (!data->buffer)
     {
@@ -329,9 +315,9 @@ import(const char *file, ST_LOG *data)
         return ERR_OUT_OF_MEMORY;
     }
 
-    fp = fopen(data->file, "r");
+    filePointer = fopen(data->file, "r");
 
-    if (!fp)
+    if (!filePointer)
     {
         free(data->file); free(data->buffer);
 
@@ -345,13 +331,13 @@ import(const char *file, ST_LOG *data)
         }
     }
 
-    fseek(fp, 0, SEEK_SET);
+    fseek(filePointer, 0, SEEK_SET);
 
-    ret = fread(data->buffer, sizeof(char), size, fp);
+    retValue = fread(data->buffer, sizeof(char), fileSize, filePointer);
 
-    fclose(fp);
+    fclose(filePointer);
 
-    if (ret != size)
+    if (retValue != fileSize)
     {
         return ERR_DEFAULT; /* Partial reading (mem. is kept allocated for further analysis) */
     }

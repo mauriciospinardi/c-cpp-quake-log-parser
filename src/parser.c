@@ -34,24 +34,24 @@ static sem_t semaphore;
 extern int
 PARSER_evaluate(ST_PARSER *data)
 {
-    int ret;
+    int retValue;
 
     APPLICATION_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
-    ret = ERR_INVALID_ARGUMENT;
+    retValue = ERR_INVALID_ARGUMENT;
 
     if (data)
     {
-        ret = LOG_evaluate(&data->log);
+        retValue = LOG_evaluate(&data->log);
     }
 
-    APPLICATION_TRACE("ret [%d]", ret);
+    APPLICATION_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
-    return ret;
+    return retValue;
 }
 
 /**
@@ -65,24 +65,24 @@ PARSER_evaluate(ST_PARSER *data)
 extern int
 PARSER_import(const char *file, ST_PARSER *data)
 {
-    int ret;
+    int retValue;
 
     APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
 
     sem_wait(&semaphore);
 
-    ret = ERR_INVALID_ARGUMENT;
+    retValue = ERR_INVALID_ARGUMENT;
 
     if (data)
     {
-        ret = LOG_import(file, &data->log);
+        retValue = LOG_import(file, &data->log);
     }
 
-    APPLICATION_TRACE("ret [%d]", ret);
+    APPLICATION_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
-    return ret;
+    return retValue;
 }
 
 /**

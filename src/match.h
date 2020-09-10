@@ -10,7 +10,7 @@
 #ifndef _MATCH_H_INCLUDED_
 #define _MATCH_H_INCLUDED_
 
-#include "utilities.h"
+#include "kill.h"
 
 /********************/
 /* Type definitions */
@@ -18,6 +18,7 @@
 
 typedef struct MATCH
 {
+    ST_KILL *kill;
     char *buffer;
     struct MATCH *next;
 } ST_MATCH;

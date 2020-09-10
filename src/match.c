@@ -2,14 +2,13 @@
  * @file match.c
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief LOG public API.
+ * @brief MATCH API.
  * @date 2020-09-06
  * 
  */
 
 #include "match.h"
 
-#include <errno.h>
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +31,9 @@ static sem_t semaphore;
 /***********************/
 
 static int
+evaluate(ST_MATCH **data);
+
+static int
 import(const char *stream, unsigned long size, ST_MATCH **data);
 
 /********************/
@@ -48,13 +50,24 @@ import(const char *stream, unsigned long size, ST_MATCH **data);
 extern int
 MATCH_evaluate(ST_MATCH **data)
 {
+    int retValue;
+
     APPLICATION_TRACE("data [%lu]", data);
 
-#warning TODO: MATCH_evaluate()
+    sem_wait(&semaphore);
 
-    (void) data;
+    retValue = ERR_INVALID_ARGUMENT;
 
-    return ERR_INVALID_ARGUMENT;
+    if (data)
+    {
+        retValue = evaluate(data);
+    }
+
+    APPLICATION_TRACE("retValue [%d]", retValue);
+
+    sem_post(&semaphore);
+
+    return retValue;
 }
 
 /**
@@ -69,19 +82,19 @@ MATCH_evaluate(ST_MATCH **data)
 extern int
 MATCH_import(const char *stream, unsigned long size, ST_MATCH **data)
 {
-    int ret;
+    int retValue;
 
     APPLICATION_TRACE("*stream [%.32s...], size [%lu], data [%lu]", (stream) ? stream : "(null)", size, data);
 
     sem_wait(&semaphore);
 
-    ret = import(stream, size, data);
+    retValue = import(stream, size, data);
 
-    APPLICATION_TRACE("ret [%d]", ret);
+    APPLICATION_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
-    return ret;
+    return retValue;
 }
 
 /**
@@ -99,6 +112,11 @@ MATCH_start(void)
         return ERR_ALREADY_STARTED;
     }
 
+    if (KILL_start())
+    {
+        return ERR_DEFAULT;
+    }
+
     sem_init(&semaphore, 0, 1);
 
     return ERR_NONE;
@@ -107,6 +125,81 @@ MATCH_start(void)
 /*********************/
 /* Private functions */
 /*********************/
+
+/**
+ * @brief @ref MATCH_evaluate()
+ * 
+ * @param[in,out] data match file structure
+ * 
+ * @return int ERR_xxx
+ */
+static int
+evaluate(ST_MATCH **data)
+{
+    ST_KILL **kill;
+    char *begin;
+    char *end;
+    int retValue;
+    unsigned long size;
+
+    if (!data)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!(*data)->buffer)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    kill = &((*data)->kill);
+
+    begin = (*data)->buffer;
+
+    while (begin)
+    {
+        begin = strstr(begin, PARSER_KEY_KILL);
+
+        if (!begin)
+        {
+            break;
+        }
+
+        end = strstr(begin + strlen(PARSER_KEY_KILL), PARSER_KEY_KILL);
+
+        if (!end)
+        {
+            end = begin;
+        }
+
+        size = strlen(begin) - strlen(end);
+
+        if (!size)
+        {
+            size = strlen(begin);
+        }
+
+        retValue = KILL_import(begin, size, kill);
+
+        if (retValue)
+        {
+            return retValue;
+        }
+
+        kill = &(*kill)->next;
+
+        if (begin != end)
+        {
+            begin = end;
+        }
+        else
+        {
+            begin = NULL; /* EOF */
+        }
+    }
+
+    return ERR_NONE; /* Kills aren't mandatory */
+}
 
 /**
  * @brief @ref MATCH_import()
