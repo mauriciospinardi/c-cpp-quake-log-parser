@@ -18,6 +18,25 @@
 /* Type definitions */
 /********************/
 
+typedef struct PLAYER_REPORT
+{
+    char *name;
+    int killCount;
+    struct PLAYER_REPORT *next;
+} ST_PLAYER_REPORT;
+
+typedef struct
+{
+    ST_PLAYER_REPORT *player;
+    int killCount;
+} ST_MATCH_REPORT;
+
+typedef struct
+{
+    int matchCount;
+    ST_MATCH_REPORT *matchReport; /* x matchCount */
+} ST_REPORT;
+
 /********************/
 /* Global variables */
 /********************/
@@ -170,10 +189,101 @@ PARSER_start(void)
 static int
 report(ST_PARSER *data)
 {
+#if 0
+
+    ST_KILL *kill;
+    ST_MATCH *match;
+    ST_REPORT report;
+    char *buffer;
+    int index;
+
+    if (!data)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!(data->log.match))
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    match = data->log.match;
+
+    memset(&report, 0, sizeof(ST_REPORT));
+
+    while (match)
+    {
+        report.matchCount += 1;
+
+        match = match->next;
+    }
+
+    report.matchReport = (ST_MATCH_REPORT *) malloc(sizeof(ST_MATCH_REPORT) * report.matchCount);
+
+    if (!report.matchReport)
+    {
+        return ERR_OUT_OF_MEMORY;
+    }
+
+    memset(report.matchReport, 0, sizeof(ST_MATCH_REPORT) * report.matchCount);
+
+    index = 0;
+
+    match = data->log.match;
+
+    while (match)
+    {
+        kill = match->kill;
+
+        while (kill)
+        {
+            if (!kill->buffer)
+            {
+                return ERR_INVALID_ARGUMENT;
+            }
+
+            buffer = strstr(kill->buffer + strlen(PARSER_KEY_KILL) + 1, ":");
+
+            if (!buffer)
+            {
+                return ERR_INVALID_ARGUMENT;
+            }
+
+            buffer += 2; /* ": " */
+
+            if (!strcmp("<world>", buffer))
+            {
+                /* TODO: (A) find/add player and (B) substract 1 from his kill
+                 * count */
+            }
+            else
+            {
+                /* TODO: (A) find/add player and (B) add 1 to his kill count */
+            }
+
+            APPLICATION_TRACE("kill [%.16s...]", buffer);
+
+            report.matchReport[index].killCount += 1;
+
+            kill = kill->next;
+        }
+
+        APPLICATION_TRACE("report.matchReport[%d].killCount [%d]", index, report.matchReport[index].killCount);
+
+        match = match->next;
+
+        index += 1;
+    }
+
+    APPLICATION_TRACE("report.matchCount [%d]", report.matchCount);
+
+#else
 
 #warning TODO: PARSER_report()
 
     (void) data;
+
+#endif /* #if 0 */
 
     return ERR_DEFAULT;
 }
