@@ -14,12 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**********/
-/* Macros */
-/**********/
-
-#define PARSER_KEY_KILL "Kill:"
-
 /********************/
 /* Global variables */
 /********************/
@@ -240,6 +234,8 @@ import(const char *stream, unsigned long size, ST_MATCH **data)
     }
 
     (*data)->next = NULL;
+
+    (*data)->kill = NULL;
 
     memcpy((*data)->buffer, stream, size);
 

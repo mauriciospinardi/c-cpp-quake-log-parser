@@ -12,10 +12,15 @@
 
 #include "match.h"
 
+/**********/
+/* Macros */
+/**********/
+
+#define PARSER_KEY_MATCH "InitGame:"
+
 /********************/
 /* Type definitions */
 /********************/
-
 typedef struct LOG
 {
     ST_MATCH *match;

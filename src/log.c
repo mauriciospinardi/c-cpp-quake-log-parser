@@ -15,12 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**********/
-/* Macros */
-/**********/
-
-#define PARSER_KEY_MATCH "InitGame:"
-
 /********************/
 /* Global variables */
 /********************/
