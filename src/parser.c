@@ -9,6 +9,8 @@
 
 #include "parser.h"
 
+#include "cJSON/1.7.14/cJSON.h"
+
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +51,9 @@ static sem_t semaphore;
 
 static int
 appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght);
+
+static int
+createJSON(ST_REPORT *report, cJSON **json);
 
 static int
 report(ST_PARSER *data);
@@ -251,6 +256,125 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 }
 
 /**
+ * @brief Creates a JSON stream from a ST_REPORT structure.
+ * 
+ * @param report ST_REPORT structure
+ * @param json cJSON stream
+ * 
+ * @return int ERR_xxx
+ */
+static int
+createJSON(ST_REPORT *report, cJSON **json)
+{
+    ST_PLAYER_REPORT *player;
+    cJSON *item[2];
+    cJSON *array;
+    cJSON *object[3];
+    char matchID[16];
+    int index;
+
+    if (!report || !json)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    for (index = 0; index < report->matchCount; index++)
+    {
+        object[1] = cJSON_CreateObject();
+
+        if (!object[1])
+        {
+            return ERR_OUT_OF_MEMORY;
+        }
+
+        item[0] = cJSON_CreateNumber((double) report->matchReport[index].killCount);
+
+        if (!item[0])
+        {
+            cJSON_Delete(object[1]);
+
+            return ERR_OUT_OF_MEMORY;
+        }
+
+        cJSON_AddItemToObject(object[1], "total_kills", item[0]);
+
+        object[0] = cJSON_CreateObject();
+
+        if (!object[0])
+        {
+            cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+
+            return ERR_OUT_OF_MEMORY;
+        }
+
+        sprintf(matchID, "game_%d", index + 1);
+
+        player = report->matchReport[index].player;
+
+        array = cJSON_CreateArray();
+
+        if (!array)
+        {
+            cJSON_Delete(object[0]); cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+
+            return ERR_OUT_OF_MEMORY;
+        }
+
+        object[2] = cJSON_CreateObject();
+        
+        if (!object[2])
+        {
+            cJSON_Delete(array); cJSON_Delete(object[0]); cJSON_Delete(item[0]);
+
+            cJSON_Delete(object[1]);
+
+            return ERR_OUT_OF_MEMORY;
+        }
+
+        while (player)
+        {
+            item[0] = cJSON_CreateString(player->name);
+
+            if (!item[0])
+            {
+                cJSON_Delete(object[2]); cJSON_Delete(array); cJSON_Delete(object[0]);
+
+                cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+
+                return ERR_OUT_OF_MEMORY;
+            }
+
+            cJSON_AddItemToArray(array, item[0]);
+
+            item [1] = cJSON_CreateNumber(player->killCount);
+
+            if (!item[1])
+            {
+                cJSON_Delete(item[0]); cJSON_Delete(object[2]); cJSON_Delete(array); cJSON_Delete(object[0]);
+
+                cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+
+                return ERR_OUT_OF_MEMORY;
+            }
+
+            cJSON_AddItemToObject(object[2], player->name, item[1]);
+
+            player = player->next;
+        }
+
+        cJSON_AddItemToObject(object[1], "players", array);
+
+        cJSON_AddItemToObject(object[1], "kills", object[2]);
+
+        cJSON_AddItemToObject(object[0], matchID, object[1]);
+    }
+
+    *json = object[0];
+
+    return ERR_NONE;
+}
+
+/**
  * @brief @ref PARSER_report()
  * 
  * @param[in,out] data parser file structure
@@ -263,8 +387,10 @@ report(ST_PARSER *data)
     ST_KILL *kill;
     ST_MATCH *match;
     ST_REPORT report;
+    cJSON *json;
     char *buffer;
     int index;
+    int retValue;
     unsigned long lenght;
 
     if (!data)
@@ -296,6 +422,8 @@ report(ST_PARSER *data)
     }
 
     memset(report.matchReport, 0, sizeof(ST_MATCH_REPORT) * report.matchCount);
+
+    json = NULL;
 
     index = 0;
 
@@ -394,8 +522,14 @@ report(ST_PARSER *data)
         match = match->next;
     }
 
+    retValue = createJSON(&report, &json);
+
+    if (retValue)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
     /* TODO:
-     * - createJSON()
      * - saveReport()
      */
 
