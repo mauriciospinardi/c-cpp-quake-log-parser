@@ -12,12 +12,6 @@
 
 #include "kill.h"
 
-/**********/
-/* Macros */
-/**********/
-
-#define PARSER_KEY_KILL "Kill:"
-
 /********************/
 /* Type definitions */
 /********************/

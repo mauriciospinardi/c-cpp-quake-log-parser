@@ -204,7 +204,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, "<world>", lenght))
+    if (!strncmp(name, PARSER_KEY_WORLD, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }
@@ -307,7 +307,7 @@ report(ST_PARSER *data)
 
         while (buffer)
         {
-            buffer = strstr(buffer, "ClientUserinfoChanged:");
+            buffer = strstr(buffer, PARSER_KEY_PLAYER);
 
             if (!buffer) /* No players found */
             {
@@ -364,7 +364,7 @@ report(ST_PARSER *data)
 
             lenght -= (unsigned long) buffer;
 
-            if (strncmp("<world>", buffer, lenght))
+            if (strncmp(PARSER_KEY_WORLD, buffer, lenght))
             {
                 updatePlayer(report.matchReport[index].player, buffer, (int) lenght, 1);
             }
@@ -420,7 +420,7 @@ updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, "<world>", lenght))
+    if (!strncmp(name, PARSER_KEY_WORLD, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }

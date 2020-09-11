@@ -20,6 +20,11 @@
 #define APPLICATION_TRACE(...) /* NULL */
 #endif /* #ifdef _DEBUG_ */
 
+#define PARSER_KEY_KILL "Kill:"
+#define PARSER_KEY_MATCH "InitGame:"
+#define PARSER_KEY_PLAYER "ClientUserinfoChanged:"
+#define PARSER_KEY_WORLD "<world>"
+
 /********************/
 /* Type definitions */
 /********************/

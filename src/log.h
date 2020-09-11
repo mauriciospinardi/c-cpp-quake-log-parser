@@ -12,12 +12,6 @@
 
 #include "match.h"
 
-/**********/
-/* Macros */
-/**********/
-
-#define PARSER_KEY_MATCH "InitGame:"
-
 /********************/
 /* Type definitions */
 /********************/
