@@ -48,7 +48,13 @@ static sem_t semaphore;
 /***********************/
 
 static int
+appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght);
+
+static int
 report(ST_PARSER *data);
+
+static int
+updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count);
 
 /********************/
 /* Public functions */
@@ -180,6 +186,71 @@ PARSER_start(void)
 /*********************/
 
 /**
+ * @brief Appends a player to a player list.
+ * 
+ * @param list player list
+ * @param name player name
+ * @param lenght lenght of player name
+ * 
+ * @return int ERR_xxx
+ */
+static int
+appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
+{
+    ST_PLAYER_REPORT *pointer;
+
+    if (!list || !name || lenght <= 0)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!strncmp(name, "<world>", lenght))
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    pointer = *list;
+
+    while (pointer)
+    {
+        if (!strncmp(pointer->name, name, lenght)) /* Player already on the list */
+        {
+            return ERR_NONE;
+        }
+
+        pointer = pointer->next;
+    }
+
+    pointer = (ST_PLAYER_REPORT *) malloc(sizeof(ST_PLAYER_REPORT));
+
+    if (!pointer)
+    {
+        return ERR_OUT_OF_MEMORY;
+    }
+
+    pointer->next = *list;
+
+    pointer->killCount = 0;
+
+    pointer->name = (char *) malloc(sizeof(char) * (lenght + 1));
+
+    if (!pointer->name)
+    {
+        free(pointer);
+
+        return ERR_OUT_OF_MEMORY;
+    }
+
+    strncpy(pointer->name, name, lenght);
+
+    pointer->name[lenght] = 0;
+
+    *list = pointer;
+
+    return ERR_NONE;
+}
+
+/**
  * @brief @ref PARSER_report()
  * 
  * @param[in,out] data parser file structure
@@ -189,13 +260,12 @@ PARSER_start(void)
 static int
 report(ST_PARSER *data)
 {
-#if 0
-
     ST_KILL *kill;
     ST_MATCH *match;
     ST_REPORT report;
     char *buffer;
     int index;
+    unsigned long lenght;
 
     if (!data)
     {
@@ -233,6 +303,38 @@ report(ST_PARSER *data)
 
     while (match)
     {
+        buffer = match->buffer;
+
+        while (buffer)
+        {
+            buffer = strstr(buffer, "ClientUserinfoChanged:");
+
+            if (!buffer) /* No players found */
+            {
+                break;
+            }
+
+            buffer = strstr(buffer, "n\\");
+
+            if (!buffer)
+            {
+                return ERR_INVALID_ARGUMENT;
+            }
+
+            buffer += 2; /* "n\" */
+
+            lenght = (unsigned long) strstr(buffer, "\\t");
+
+            if (!lenght)
+            {
+                return ERR_INVALID_ARGUMENT;
+            }
+
+            lenght -= (unsigned long) buffer;
+
+            appendPlayer(&(report.matchReport[index].player), buffer, (int) lenght);
+        }
+
         kill = match->kill;
 
         while (kill)
@@ -242,7 +344,9 @@ report(ST_PARSER *data)
                 return ERR_INVALID_ARGUMENT;
             }
 
-            buffer = strstr(kill->buffer + strlen(PARSER_KEY_KILL) + 1, ":");
+            buffer = kill->buffer;
+
+            buffer = strstr(buffer + strlen(PARSER_KEY_KILL), ":");
 
             if (!buffer)
             {
@@ -251,39 +355,89 @@ report(ST_PARSER *data)
 
             buffer += 2; /* ": " */
 
-            if (!strcmp("<world>", buffer))
+            lenght = (unsigned long) strstr(buffer, " killed");
+
+            if (!lenght)
             {
-                /* TODO: (A) find/add player and (B) substract 1 from his kill
-                 * count */
+                return ERR_INVALID_ARGUMENT;
+            }
+
+            lenght -= (unsigned long) buffer;
+
+            if (strncmp("<world>", buffer, lenght))
+            {
+                updatePlayer(report.matchReport[index].player, buffer, (int) lenght, 1);
             }
             else
             {
-                /* TODO: (A) find/add player and (B) add 1 to his kill count */
-            }
+                buffer = strstr(buffer, "killed ") + strlen("killed ");
 
-            APPLICATION_TRACE("kill [%.16s...]", buffer);
+                lenght = (unsigned long) strstr(buffer, " by");
+
+                if (!lenght)
+                {
+                    return ERR_INVALID_ARGUMENT;
+                }
+
+                lenght -= (unsigned long) buffer;
+
+                updatePlayer(report.matchReport[index].player, buffer, (int) lenght, -1);
+            }
 
             report.matchReport[index].killCount += 1;
 
             kill = kill->next;
         }
 
-        APPLICATION_TRACE("report.matchReport[%d].killCount [%d]", index, report.matchReport[index].killCount);
+        index += 1;
 
         match = match->next;
-
-        index += 1;
     }
 
-    APPLICATION_TRACE("report.matchCount [%d]", report.matchCount);
-
-#else
-
-#warning TODO: PARSER_report()
-
-    (void) data;
-
-#endif /* #if 0 */
+    /* TODO:
+     * - createJSON()
+     * - saveReport()
+     */
 
     return ERR_DEFAULT;
+}
+
+/**
+ * @brief Updates the kill count of a player.
+ * 
+ * @param list player list
+ * @param name player name
+ * @param lenght lenght of player name
+ * @param count value to be added to the player kill count
+ * 
+ * @return int ERR_xxx
+ */
+static int
+updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count)
+{
+    if (!list || !name || lenght <= 0)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!strncmp(name, "<world>", lenght))
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    while (list)
+    {
+        if (strncmp(list->name, name, lenght)) /* Player found */
+        {
+            list = list->next;
+
+            continue;
+        }
+
+        list->killCount += count;
+
+        return ERR_NONE;
+    }
+
+    return ERR_INVALID_ARGUMENT;
 }
