@@ -59,6 +59,9 @@ static int
 report(ST_PARSER *data);
 
 static int
+saveReport(char *name, cJSON **json);
+
+static int
 updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count);
 
 /********************/
@@ -278,11 +281,18 @@ createJSON(ST_REPORT *report, cJSON **json)
         return ERR_INVALID_ARGUMENT;
     }
 
+    *json = cJSON_CreateObject();
+
+    if (!*json)
+    {
+        return ERR_OUT_OF_MEMORY;
+    }
+
     for (index = 0; index < report->matchCount; index++)
     {
-        object[1] = cJSON_CreateObject();
+        object[0] = cJSON_CreateObject();
 
-        if (!object[1])
+        if (!object[0])
         {
             return ERR_OUT_OF_MEMORY;
         }
@@ -291,21 +301,12 @@ createJSON(ST_REPORT *report, cJSON **json)
 
         if (!item[0])
         {
-            cJSON_Delete(object[1]);
+            cJSON_Delete(object[0]); cJSON_Delete(*json);
 
             return ERR_OUT_OF_MEMORY;
         }
 
-        cJSON_AddItemToObject(object[1], "total_kills", item[0]);
-
-        object[0] = cJSON_CreateObject();
-
-        if (!object[0])
-        {
-            cJSON_Delete(item[0]); cJSON_Delete(object[1]);
-
-            return ERR_OUT_OF_MEMORY;
-        }
+        cJSON_AddItemToObject(object[0], "total_kills", item[0]);
 
         sprintf(matchID, "game_%d", index + 1);
 
@@ -315,18 +316,16 @@ createJSON(ST_REPORT *report, cJSON **json)
 
         if (!array)
         {
-            cJSON_Delete(object[0]); cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+            cJSON_Delete(item[0]); cJSON_Delete(object[0]); cJSON_Delete(*json);
 
             return ERR_OUT_OF_MEMORY;
         }
 
-        object[2] = cJSON_CreateObject();
+        object[1] = cJSON_CreateObject();
         
-        if (!object[2])
+        if (!object[1])
         {
-            cJSON_Delete(array); cJSON_Delete(object[0]); cJSON_Delete(item[0]);
-
-            cJSON_Delete(object[1]);
+            cJSON_Delete(array); cJSON_Delete(item[0]); cJSON_Delete(object[0]); cJSON_Delete(*json);
 
             return ERR_OUT_OF_MEMORY;
         }
@@ -337,9 +336,9 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             if (!item[0])
             {
-                cJSON_Delete(object[2]); cJSON_Delete(array); cJSON_Delete(object[0]);
+                cJSON_Delete(object[1]); cJSON_Delete(array); cJSON_Delete(item[0]);
 
-                cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+                cJSON_Delete(object[0]); cJSON_Delete(*json);
 
                 return ERR_OUT_OF_MEMORY;
             }
@@ -350,26 +349,24 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             if (!item[1])
             {
-                cJSON_Delete(item[0]); cJSON_Delete(object[2]); cJSON_Delete(array); cJSON_Delete(object[0]);
+                cJSON_Delete(object[1]); cJSON_Delete(array); cJSON_Delete(item[0]);
 
-                cJSON_Delete(item[0]); cJSON_Delete(object[1]);
+                cJSON_Delete(object[0]); cJSON_Delete(*json);
 
                 return ERR_OUT_OF_MEMORY;
             }
 
-            cJSON_AddItemToObject(object[2], player->name, item[1]);
+            cJSON_AddItemToObject(object[1], player->name, item[1]);
 
             player = player->next;
         }
 
-        cJSON_AddItemToObject(object[1], "players", array);
+        cJSON_AddItemToObject(object[0], "players", array);
 
-        cJSON_AddItemToObject(object[1], "kills", object[2]);
+        cJSON_AddItemToObject(object[0], "kills", object[1]);
 
-        cJSON_AddItemToObject(object[0], matchID, object[1]);
+        cJSON_AddItemToObject(*json, matchID, object[0]);
     }
-
-    *json = object[0];
 
     return ERR_NONE;
 }
@@ -439,7 +436,7 @@ report(ST_PARSER *data)
 
             if (!buffer) /* No players found */
             {
-                break;
+                return ERR_INVALID_ARGUMENT;
             }
 
             buffer = strstr(buffer, "n\\");
@@ -529,11 +526,73 @@ report(ST_PARSER *data)
         return ERR_INVALID_ARGUMENT;
     }
 
-    /* TODO:
-     * - saveReport()
-     */
+    return (saveReport(data->log.file, &json)) ? ERR_DEFAULT : ERR_NONE;
+}
 
-    return ERR_DEFAULT;
+/**
+ * @brief Saves a JSON file correspondent to the parsing of a previously
+ * imported and evaluated log file.
+ *
+ * @param name log file name
+ * @param json JSON stream previously built
+ * 
+ * @return int ERR_xxx
+ */
+static int
+saveReport(char *name, cJSON **json)
+{
+    FILE *filePointer;
+    char *file;
+    char *stream;
+    int size;
+
+    if (!name || !json)
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    if (!name[0])
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
+    file = (char *) malloc(sizeof(char) * (strlen(name) + 1));
+
+    if (!file)
+    {
+        return ERR_OUT_OF_MEMORY;
+    }
+
+    strcpy(file, name);
+
+    strcat(file, ".json");
+
+    filePointer = fopen(file, "w+"); /* Will overwrite if exists */
+
+    if (!filePointer)
+    {
+        return ERR_DEFAULT;
+    }
+
+    stream = cJSON_Print(*json);
+
+    if (!stream)
+    {
+        return ERR_OUT_OF_MEMORY;
+    }
+
+    size = strlen(stream);
+
+    if (!fwrite(stream, sizeof(char), size, filePointer))
+    {
+        free(stream);
+
+        return ERR_DEFAULT;
+    }
+
+    free(stream);
+
+    return (fclose(filePointer)) ? ERR_DEFAULT : ERR_NONE;
 }
 
 /**
