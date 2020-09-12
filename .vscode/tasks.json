@@ -10,6 +10,12 @@
          "group": "build"
       },
       {
+        "label": "--build-release",
+        "type": "shell",
+        "command": "& bash -c \"make\" & exit",
+        "group": "build"
+      },
+      {
          "label": "--clean-all",
          "type": "shell",
          "command": "& bash -c \"make clean\" & exit",
@@ -20,7 +26,13 @@
          "type": "shell",
          "command": "& bash -c \"make -B CFG_NAME=debug\" & exit",
          "group": "build"
-      }
+      },
+      {
+        "label": "--rebuild-release",
+        "type": "shell",
+        "command": "& bash -c \"make -B\" & exit",
+        "group": "build"
+     }
    ],
    "problemMatcher": {
       "owner": "cpp",
