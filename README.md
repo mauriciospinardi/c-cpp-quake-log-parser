@@ -1,8 +1,5 @@
 # Hello from CloudWalk: Quake Log Parser
 
-> Truth can only be found in one place: the code. <br/>
-> -- Robert C. Martin
-
 Skills presentation for CloudWalk, Inc.  
 
 ## Summary
@@ -92,7 +89,7 @@ W.I.P.
   object oriented approach, as its hinted by the prefixes in the public API:
     - \<"class"\>_\<"public method"\>
 - cJSON data format handling happens through Dave Gamble's
-  [cJSON](github.com/DaveGamble/cJSON), under the MIT License.
+  [cJSON](https://github.com/DaveGamble/cJSON), under the MIT License.
 - Structure was defined to highlight knowledge over C/C++ language and
   programming overall. That made the final repository more complex than it
   needed to be for the intended functional goal. Also, it would be better to
