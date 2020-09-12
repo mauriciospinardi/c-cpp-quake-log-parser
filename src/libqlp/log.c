@@ -50,7 +50,7 @@ LOG_evaluate(ST_LOG *data)
 {
     int retValue;
 
-    APPLICATION_TRACE("data [%lu]", data);
+    LIBQLP_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
@@ -61,7 +61,7 @@ LOG_evaluate(ST_LOG *data)
         retValue = evaluate(data);
     }
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -81,13 +81,13 @@ LOG_import(const char *file, ST_LOG *data)
 {
     int retValue;
 
-    APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
+    LIBQLP_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
 
     sem_wait(&semaphore);
 
     retValue = import(file, data);
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -155,14 +155,14 @@ evaluate(ST_LOG *data)
 
     while (begin)
     {
-        begin = strstr(begin, PARSER_KEY_MATCH);
+        begin = strstr(begin, QLP_KEY_MATCH);
 
         if (!begin)
         {
             break;
         }
 
-        end = strstr(begin + strlen(PARSER_KEY_MATCH), PARSER_KEY_MATCH);
+        end = strstr(begin + strlen(QLP_KEY_MATCH), QLP_KEY_MATCH);
 
         if (!end)
         {

@@ -10,17 +10,7 @@
 #ifndef _KILL_H_INCLUDED_
 #define _KILL_H_INCLUDED_
 
-#include "utilities.h"
-
-/********************/
-/* Type definitions */
-/********************/
-
-typedef struct KILL
-{
-    char *buffer;
-    struct KILL *next;
-} ST_KILL;
+#include "qlp.h"
 
 /********************/
 /* Public functions */

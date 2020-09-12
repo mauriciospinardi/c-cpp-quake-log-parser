@@ -2,7 +2,7 @@
  * @file utilities.c
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief Quake Log Parser utilities API.
+ * @brief UTILITIES API.
  * @date 2020-09-03
  * 
  */

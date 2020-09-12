@@ -7,15 +7,15 @@ Skills presentation for CloudWalk, Inc.
 
 ## Summary
 
-- [Development environment]()
-- [Build]()
-  - [Defining the environment]()
-  - [Build commands]()
-  - [Visual Studio Code]()
-    - [Example]()
-- [Execution and debugging]()
-- [Development notes]()
-  - [Unit tests]()
+- [Development environment](#development-environment)
+- [Build](#build)
+  - [Defining the environment](#defining-the-environment)
+  - [Build commands](#build-commands)
+  - [Visual Studio Code](#visual-studio-code)
+    - [Example](#example)
+- [Execution and debugging](#execution-and-debugging)
+- [Development notes](#development-notes)
+  - [Unit tests](#unit-tests)
 
 ## Development environment
 
@@ -78,7 +78,7 @@ to trigger the compilation process in ```debug``` mode.
 
 ## Execution and debugging
 
-T.B.D.  
+W.I.P.  
 
 ## Development notes
 
@@ -89,11 +89,18 @@ T.B.D.
     - It's the most generic approach for embedded devices wich can deal with
       C/C++ code (tough the target, in this case, is a regular PC).
 - Despite procedurally written, code has some characteristics usual to the
-  object oriented approach, as its hinted by the prefixes in the public API.
+  object oriented approach, as its hinted by the prefixes in the public API:
     - \<"class"\>_\<"public method"\>
 - cJSON data format handling happens through Dave Gamble's
   [cJSON](github.com/DaveGamble/cJSON), under the MIT License.
+- Structure was defined to highlight knowledge over C/C++ language and
+  programming overall. That made the final repository more complex than it
+  needed to be for the intended functional goal. Also, it would be better to
+  have 3 repositories, other than 1:
+  - main application
+    - libqlp (QLP stands for Quake Log Parser)
+    - libcjson (cJSON)
 
 ### Unit tests
 
-T.B.D.  
+W.I.P.  

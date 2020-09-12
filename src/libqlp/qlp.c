@@ -2,14 +2,14 @@
  * @file parser.c
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief PARSER public API.
+ * @brief QLP public API.
  * @date 2020-09-03
  * 
  */
 
-#include "parser.h"
+#include "qlp.h"
 
-#include "cJSON/1.7.14/cJSON.h"
+#include "libcjson/cJSON.h"
 
 #include <semaphore.h>
 #include <stdio.h>
@@ -56,7 +56,7 @@ static int
 createJSON(ST_REPORT *report, cJSON **json);
 
 static int
-report(ST_PARSER *data);
+report(ST_QLP *data);
 
 static int
 saveReport(char *name, cJSON **json);
@@ -69,18 +69,18 @@ updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count);
 /********************/
 
 /**
- * @brief @ref parser.h
+ * @brief @ref libqlp/qlp.h
  * 
  * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
 extern int
-PARSER_evaluate(ST_PARSER *data)
+QLP_evaluate(ST_QLP *data)
 {
     int retValue;
 
-    APPLICATION_TRACE("data [%lu]", data);
+    LIBQLP_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
@@ -91,7 +91,7 @@ PARSER_evaluate(ST_PARSER *data)
         retValue = LOG_evaluate(&data->log);
     }
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -99,7 +99,7 @@ PARSER_evaluate(ST_PARSER *data)
 }
 
 /**
- * @brief @ref parser.h
+ * @brief @ref libqlp/qlp.h
  *
  * @param[in] file file name
  * @param[out] data parser file structure
@@ -107,11 +107,11 @@ PARSER_evaluate(ST_PARSER *data)
  * @return int ERR_xxx
  */
 extern int
-PARSER_import(const char *file, ST_PARSER *data)
+QLP_import(const char *file, ST_QLP *data)
 {
     int retValue;
 
-    APPLICATION_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
+    LIBQLP_TRACE("*file [%s], data [%lu]", (file) ? file : "(null)", data);
 
     sem_wait(&semaphore);
 
@@ -122,7 +122,7 @@ PARSER_import(const char *file, ST_PARSER *data)
         retValue = LOG_import(file, &data->log);
     }
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -130,18 +130,18 @@ PARSER_import(const char *file, ST_PARSER *data)
 }
 
 /**
- * @brief @ref parser.h
+ * @brief @ref libqlp/qlp.h
  * 
  * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
 extern int
-PARSER_report(ST_PARSER *data)
+QLP_report(ST_QLP *data)
 {
     int retValue;
 
-    APPLICATION_TRACE("data [%lu]", data);
+    LIBQLP_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
@@ -152,7 +152,7 @@ PARSER_report(ST_PARSER *data)
         retValue = report(data);
     }
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -160,12 +160,12 @@ PARSER_report(ST_PARSER *data)
 }
 
 /**
- * @brief @ref parser.h
+ * @brief @ref libqlp/qlp.h
  * 
  * @return int ERR_xxx
  */
 extern int
-PARSER_start(void)
+QLP_start(void)
 {
     static int start = -1;
 
@@ -212,7 +212,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, PARSER_KEY_WORLD, lenght))
+    if (!strncmp(name, QLP_KEY_WORLD, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }
@@ -372,14 +372,14 @@ createJSON(ST_REPORT *report, cJSON **json)
 }
 
 /**
- * @brief @ref PARSER_report()
+ * @brief @ref QLP_report()
  * 
  * @param[in,out] data parser file structure
  * 
  * @return int ERR_xxx
  */
 static int
-report(ST_PARSER *data)
+report(ST_QLP *data)
 {
     ST_KILL *kill;
     ST_MATCH *match;
@@ -432,11 +432,16 @@ report(ST_PARSER *data)
 
         while (buffer)
         {
-            buffer = strstr(buffer, PARSER_KEY_PLAYER);
+            buffer = strstr(buffer, QLP_KEY_PLAYER);
 
-            if (!buffer) /* No players found */
+            if (!buffer)
             {
-                return ERR_INVALID_ARGUMENT;
+                if (!report.matchReport[index].player) /* No players found */
+                {
+                    return ERR_INVALID_ARGUMENT;
+                }
+
+                break;
             }
 
             buffer = strstr(buffer, "n\\");
@@ -471,7 +476,7 @@ report(ST_PARSER *data)
 
             buffer = kill->buffer;
 
-            buffer = strstr(buffer + strlen(PARSER_KEY_KILL), ":");
+            buffer = strstr(buffer + strlen(QLP_KEY_KILL), ":");
 
             if (!buffer)
             {
@@ -489,7 +494,7 @@ report(ST_PARSER *data)
 
             lenght -= (unsigned long) buffer;
 
-            if (strncmp(PARSER_KEY_WORLD, buffer, lenght))
+            if (strncmp(QLP_KEY_WORLD, buffer, lenght))
             {
                 updatePlayer(report.matchReport[index].player, buffer, (int) lenght, 1);
             }
@@ -613,7 +618,7 @@ updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, PARSER_KEY_WORLD, lenght))
+    if (!strncmp(name, QLP_KEY_WORLD, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }

@@ -7,7 +7,7 @@
  * 
  */
 
-#include "parser.h"
+#include "libqlp/qlp.h" /* (Q)uake (L)og (P)arser API */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,43 +34,38 @@ terminate(const char *executable, int error);
  */
 int main(int argc, char *argv[])
 {
-    ST_PARSER data;
+    ST_QLP data;
     int retValue;
 
-    retValue = PARSER_start();
+    retValue = QLP_start();
 
-    if (retValue)
+    if (retValue || argc <= 1)
     {
-        terminate(argv[0], ERR_DEFAULT);
+        terminate(argv[0], EXIT_FAILURE);
     }
 
-    APPLICATION_TRACE("argc [%d] argv[0] [%s]", argc, argv[0]);
-
-    if (argc <= 1)
-    {
-        terminate(argv[0], ERR_INVALID_ARGUMENT);
-    }
-
-    retValue = PARSER_import(argv[1], &data);
+    retValue = QLP_import(argv[1], &data);
 
     if (retValue)
     {
         terminate(argv[0], retValue);
     }
 
-    retValue = PARSER_evaluate(&data);
+    retValue = QLP_evaluate(&data);
 
     if (retValue)
     {
         terminate(argv[0], retValue);
     }
 
-    retValue = PARSER_report(&data);
+    retValue = QLP_report(&data);
 
     if (retValue)
     {
         terminate(argv[0], retValue);
     }
+
+    terminate(argv[0], EXIT_SUCCESS);
 
     return EXIT_SUCCESS;
 }
@@ -88,13 +83,17 @@ int main(int argc, char *argv[])
 static void
 terminate(const char *executable, int error)
 {
+    printf("\nUsage: %s [file]", executable);
+
     if (!error)
     {
+        printf("\n    Success: [file].json generated");
+        printf("\n");
+
         exit(EXIT_SUCCESS);
     }
     else
     {
-        printf("\nUsage: %s [file]", executable);
         printf("\n    Error: %d", error);
         printf("\n");
 

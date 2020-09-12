@@ -10,17 +10,7 @@
 #ifndef _LOG_H_INCLUDED_
 #define _LOG_H_INCLUDED_
 
-#include "match.h"
-
-/********************/
-/* Type definitions */
-/********************/
-typedef struct LOG
-{
-    ST_MATCH *match;
-    char *buffer;
-    char *file;
-} ST_LOG;
+#include "qlp.h"
 
 /********************/
 /* Public functions */

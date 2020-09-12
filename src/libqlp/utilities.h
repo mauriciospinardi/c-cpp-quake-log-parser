@@ -2,7 +2,7 @@
  * @file utilities.h
  * @author Maurício Spinardi (mauricio.spinardi@gmail.com)
  * @platform cygwin64
- * @brief Utilities definitions.
+ * @brief Private namespace, class or interface definitions.
  * @date 2020-09-06
  * 
  */
@@ -10,37 +10,17 @@
 #ifndef _UTILITIES_H_INCLUDED_
 #define _UTILITIES_H_INCLUDED_
 
+#include "qlp.h"
+
 /**********/
 /* Macros */
 /**********/
 
 #ifdef _DEBUG_
-#define APPLICATION_TRACE(...) UTILITIES_log(__DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LIBQLP_TRACE(...) UTILITIES_log(__DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 #else
-#define APPLICATION_TRACE(...) /* NULL */
+#define LIBQLP_TRACE(...) /* NULL */
 #endif /* #ifdef _DEBUG_ */
-
-#define PARSER_KEY_KILL "Kill:"
-#define PARSER_KEY_MATCH "InitGame:"
-#define PARSER_KEY_PLAYER "ClientUserinfoChanged:"
-#define PARSER_KEY_WORLD "<world>"
-
-/********************/
-/* Type definitions */
-/********************/
-
-typedef enum
-{
-    ERR_DEFAULT = -999,
-    ERR_ALREADY_STARTED,
-    ERR_FILE_EMPTY,
-    ERR_FILE_NOT_FOUND,
-    ERR_INVALID_ARGUMENT,
-    ERR_OUT_OF_MEMORY,
-    ERR_MATCH_NOT_FOUND,
-    /* ERR_MARKER */
-    ERR_NONE = 0
-} EN_ERROR;
 
 /********************/
 /* Public functions */

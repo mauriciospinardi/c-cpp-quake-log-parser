@@ -46,7 +46,7 @@ MATCH_evaluate(ST_MATCH **data)
 {
     int retValue;
 
-    APPLICATION_TRACE("data [%lu]", data);
+    LIBQLP_TRACE("data [%lu]", data);
 
     sem_wait(&semaphore);
 
@@ -57,7 +57,7 @@ MATCH_evaluate(ST_MATCH **data)
         retValue = evaluate(data);
     }
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -78,13 +78,13 @@ MATCH_import(const char *stream, unsigned long size, ST_MATCH **data)
 {
     int retValue;
 
-    APPLICATION_TRACE("*stream [%.32s...], size [%lu], data [%lu]", (stream) ? stream : "(null)", size, data);
+    LIBQLP_TRACE("*stream [%.32s...], size [%lu], data [%lu]", (stream) ? stream : "(null)", size, data);
 
     sem_wait(&semaphore);
 
     retValue = import(stream, size, data);
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
@@ -152,14 +152,14 @@ evaluate(ST_MATCH **data)
 
     while (begin)
     {
-        begin = strstr(begin, PARSER_KEY_KILL);
+        begin = strstr(begin, QLP_KEY_KILL);
 
         if (!begin)
         {
             break;
         }
 
-        end = strstr(begin + strlen(PARSER_KEY_KILL), PARSER_KEY_KILL);
+        end = strstr(begin + strlen(QLP_KEY_KILL), QLP_KEY_KILL);
 
         if (!end)
         {

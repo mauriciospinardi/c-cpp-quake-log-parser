@@ -60,6 +60,8 @@ endif
 
 CFLAGS += \
 $(DEF) \
+-I"include" \
+-I"include/libcjson" \
 -Wall \
 -Wextra
 
@@ -72,15 +74,9 @@ LDFLAGS += \
 # Output objects
 
 OBJS := \
-$(patsubst src/%,$(BUILD_DIR)/%.o,$(wildcard src/*.c*))
-
-# (cJSON 1.7.14)
-
-cJSON := \
-src/cJSON/1.7.14
-
-OBJS += \
-$(patsubst $(cJSON)/cJSON.c,$(BUILD_DIR)/cJSON.c.o,$(wildcard $(cJSON)/cJSON.c))
+$(patsubst src/%,$(BUILD_DIR)/%.o,$(wildcard src/*.c*)) \
+$(patsubst src/libcjson/cJSON.c,$(BUILD_DIR)/cJSON.c.o,$(wildcard src/libcjson/cJSON.c)) \
+$(patsubst src/libqlp/%,$(BUILD_DIR)/%.o,$(wildcard src/libqlp/*.c*))
 
 # Building rules
 
@@ -98,15 +94,13 @@ $(BUILD_DIR)/%.c.o: src/%.c
 	@echo - compiling with gcc $<...
 	@$(CC) -std=c99 $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.cpp.o: src/%.cpp
-	@echo - compiling with g++ $<...
-	@$(CPP) -std=c++11 $(CFLAGS) -c $< -o $@
-
-# (cJSON 1.7.14)
-
-$(BUILD_DIR)/%.c.o: $(cJSON)/%.c
+$(BUILD_DIR)/%.c.o: src/libcjson/%.c
 	@echo - compiling with gcc $<...
 	@$(CC) -std=c89 $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.c.o: src/libqlp/%.c
+	@echo - compiling with gcc $<...
+	@$(CC) -std=c99 $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:

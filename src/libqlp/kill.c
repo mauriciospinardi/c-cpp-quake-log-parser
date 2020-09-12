@@ -45,13 +45,13 @@ KILL_import(const char *stream, unsigned long size, ST_KILL **data)
 {
     int retValue;
 
-    APPLICATION_TRACE("*stream [%.32s...], size [%lu], data [%lu]", (stream) ? stream : "(null)", size, data);
+    LIBQLP_TRACE("*stream [%.32s...], size [%lu], data [%lu]", (stream) ? stream : "(null)", size, data);
 
     sem_wait(&semaphore);
 
     retValue = import(stream, size, data);
 
-    APPLICATION_TRACE("retValue [%d]", retValue);
+    LIBQLP_TRACE("retValue [%d]", retValue);
 
     sem_post(&semaphore);
 
