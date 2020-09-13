@@ -28,6 +28,12 @@
     } \
 }
 
+#ifdef _UNIT_TESTS_
+#define LIBQLP_PRINTF(...) /* NULL */
+#else
+#define LIBQLP_PRINTF(...) printf(__VA_ARGS__)
+#endif /* _UNIT_TESTS_ */
+
 #ifdef _DEBUG_
 #define LIBQLP_TRACE(...) UTILITIES_log(__DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 #else

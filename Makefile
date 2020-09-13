@@ -42,6 +42,11 @@ DEF := \
 -D_PROJECT_NAME_="\"$(PROJECT_NAME)\"" \
 -D_PROJECT_VERSION_="\"$(PROJECT_VERSION)\""
 
+ifeq ($(CFG_NAME),tests)
+DEF += \
+-D_UNIT_TESTS_
+endif
+
 # Executables
 
 CC := \

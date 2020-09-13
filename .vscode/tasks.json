@@ -36,7 +36,7 @@
       {
         "label": "--run-unit-tests",
         "type": "shell",
-        "command": "& bash -c \"make -B CFG_NAME=tests\" & exit",
+        "command": "& bash -c \"make -B CFG_NAME=tests\" && .\\bin\\tests\\libqlp-unit-tests.exe & exit",
         "group": "test"
       }
    ],

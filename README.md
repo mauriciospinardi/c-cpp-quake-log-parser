@@ -92,7 +92,7 @@ Similarly to what is in the [Build commands](#build-commands) section, unit
 tests can be run by:
 
 ```cmd
-<...\c-cpp-quake-log-parser>bash -c "make -B CFG_NAME=tests"
+<...\c-cpp-quake-log-parser>bash -c "make -B CFG_NAME=tests" && .\bin\tests\libqlp-unit-tests.exe
 ```
 
 An optional [Visual Studio Code](#visual-studio-code) integration is also

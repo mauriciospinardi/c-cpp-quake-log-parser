@@ -273,6 +273,11 @@ import(const char *file, ST_LOG *data)
         return ERR_INVALID_ARGUMENT;
     }
 
+    if (!file[0])
+    {
+        return ERR_INVALID_ARGUMENT;
+    }
+
     memset(data, 0, sizeof(ST_LOG));
 
     data->file = (char *) malloc(sizeof(char) * (strlen(file) + 1));

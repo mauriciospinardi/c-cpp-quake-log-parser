@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 /*********************/
 
 /**
- * @brief Show help and terminates execution.
+ * @brief Terminates execution.
  * 
  * @param[in] executable current executable path (can be relative)
  * @param[in] error autodescriptive

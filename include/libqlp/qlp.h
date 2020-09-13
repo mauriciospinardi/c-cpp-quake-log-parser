@@ -97,4 +97,12 @@ QLP_report(ST_QLP *data);
 extern int
 QLP_start(void);
 
+/**
+ * @brief Safely deallocates memory from the given input.
+ * 
+ * @param[in,out] data ST_QLP variable
+ */
+extern void
+QLP_free(ST_QLP *data);
+
 #endif /* #ifndef _QLP_H_INCLUDED_ */

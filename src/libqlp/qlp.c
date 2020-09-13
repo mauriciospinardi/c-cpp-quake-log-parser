@@ -20,9 +20,15 @@
 /* Macros */
 /**********/
 
-#define MEANS_OF_DEATH_LIST_SIZE ((int) (sizeof(ST_KILL_MEAN) * TOTAL_MEANS_OF_DEATH))
+#define MEANS_OF_DEATH_LIST_SIZE \
+( \
+    (int) (sizeof(ST_KILL_MEAN) * TOTAL_MEANS_OF_DEATH) \
+)
 
-#define TOTAL_MEANS_OF_DEATH ((int) (sizeof(meansOfDeath) / sizeof(ST_KILL_MEAN)))
+#define TOTAL_MEANS_OF_DEATH \
+( \
+    (int) (sizeof(meansOfDeath) / sizeof(ST_KILL_MEAN)) \
+)
 
 /********************/
 /* Type definitions */
@@ -103,6 +109,12 @@ static sem_t semaphore;
 
 static int
 appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght);
+
+static int
+clearQLP(ST_QLP *data, int error);
+
+static int
+clearReport(ST_REPORT *data, int error);
 
 static int
 createJSON(ST_REPORT *report, cJSON **json);
@@ -241,6 +253,25 @@ QLP_start(void)
     return ERR_NONE;
 }
 
+/**
+ * @brief @ref libqlp/qlp.h
+ * 
+ * @param[in,out] data ST_QLP variable
+ */
+extern void
+QLP_free(ST_QLP *data)
+{
+    LIBQLP_TRACE("data [%lu]", data);
+
+    sem_wait(&semaphore);
+
+    clearQLP(data, ERR_NONE);
+
+    LIBQLP_TRACE("(void)");
+
+    sem_post(&semaphore);
+}
+
 /*********************/
 /* Private functions */
 /*********************/
@@ -300,6 +331,134 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
     *list = pointer;
 
     return ERR_NONE;
+}
+
+/**
+ * @brief @ref QLP_free()
+ * 
+ * @param[in,out] data ST_QLP variable
+ * @param[in] error ERR_xxx
+ * 
+ * @return int ERR_xxx
+ */
+static int
+clearQLP(ST_QLP *data, int error)
+{
+    ST_KILL *kill[2];
+    ST_MATCH *match[2];
+
+    if (!data)
+    {
+        return error;
+    }
+
+    if (data->log.buffer)
+    {
+        free(data->log.buffer);
+    }
+
+    if (data->log.file)
+    {
+        free(data->log.file);
+    }
+
+    if (data->log.match)
+    {
+        match[0] = data->log.match;
+
+        while (match[0])
+        {
+            if (match[0]->kill)
+            {
+                kill[0] = match[0]->kill;
+
+                while (kill[0])
+                {
+                    if (kill[0]->buffer)
+                    {
+                        free(kill[0]->buffer);
+                    }
+
+                    kill[1] = kill[0]->next;
+
+                    free(kill[0]);
+
+                    kill[0] = kill[1];
+                }
+            }
+
+            if (match[0]->buffer)
+            {
+                free(match[0]->buffer);
+            }
+
+            match[1] = match[0]->next;
+
+            free(match[0]);
+
+            match[0] = match[1];
+        }
+    }
+
+    memset(&data->log, 0, sizeof(ST_LOG));
+
+    return error;
+}
+
+/**
+ * @brief @ref Safely deallocates memory from the given input.
+ * 
+ * @param[in,out] data ST_REPORT variable
+ * @param[in] error ERR_xxx
+ * 
+ * @return int ERR_xxx
+ */
+static int
+clearReport(ST_REPORT *data, int error)
+{
+    ST_PLAYER_REPORT *player[2];
+    int i;
+
+    if (!data->matchReport)
+    {
+        memset(data, 0, sizeof(ST_REPORT));
+
+        return error;
+    }
+
+    for (i = 0; i < data->matchCount; i++)
+    {
+        if (data->matchReport[i].meanOfDeath)
+        {
+            free(data->matchReport[i].meanOfDeath);
+        }
+
+        if (data->matchReport[i].player)
+        {
+            player[0] = data->matchReport[i].player;
+
+            while (player[0])
+            {
+                if (player[0]->name)
+                {
+                    free(player[0]->name);
+                }
+
+                player[1] = player[0]->next;
+
+                free(player[0]);
+
+                player[0] = player[1];
+            }
+        }
+    }
+
+    if (data->matchReport)
+    {
+        free(data->matchReport);
+    }
+
+    return error;
 }
 
 /**
@@ -408,7 +567,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     LIBQLP_MEMORY_CHECK(stream);
 
-    printf("%s", stream);
+    LIBQLP_PRINTF("%s", stream);
 
     free(stream);
 
@@ -488,7 +647,7 @@ report(ST_QLP *data)
             {
                 if (!report.matchReport[i].player) /* No players found */
                 {
-                    return ERR_INVALID_ARGUMENT;
+                    return clearReport(&report, ERR_INVALID_ARGUMENT);
                 }
 
                 break;
@@ -498,7 +657,7 @@ report(ST_QLP *data)
 
             if (!buffer)
             {
-                return ERR_INVALID_ARGUMENT;
+                return clearReport(&report, ERR_INVALID_ARGUMENT);
             }
 
             buffer += 2; /* "n\" */
@@ -507,7 +666,7 @@ report(ST_QLP *data)
 
             if (!lenght)
             {
-                return ERR_INVALID_ARGUMENT;
+                return clearReport(&report, ERR_INVALID_ARGUMENT);
             }
 
             lenght -= (unsigned long) buffer;
@@ -521,7 +680,7 @@ report(ST_QLP *data)
         {
             if (!kill->buffer)
             {
-                return ERR_INVALID_ARGUMENT;
+                return clearReport(&report, ERR_INVALID_ARGUMENT);
             }
 
             buffer = kill->buffer;
@@ -530,7 +689,7 @@ report(ST_QLP *data)
 
             if (!buffer)
             {
-                return ERR_INVALID_ARGUMENT;
+                return clearReport(&report, ERR_INVALID_ARGUMENT);
             }
 
             buffer += 2; /* ": " */
@@ -539,7 +698,7 @@ report(ST_QLP *data)
 
             if (!lenght)
             {
-                return ERR_INVALID_ARGUMENT;
+                return clearReport(&report, ERR_INVALID_ARGUMENT);
             }
 
             lenght -= (unsigned long) buffer;
@@ -552,7 +711,7 @@ report(ST_QLP *data)
 
                 if (!buffer)
                 {
-                    return ERR_INVALID_ARGUMENT;
+                    return clearReport(&report, ERR_INVALID_ARGUMENT);
                 }
 
                 buffer += 3; /* "by " */
@@ -565,7 +724,7 @@ report(ST_QLP *data)
 
                 if (!buffer)
                 {
-                    return ERR_INVALID_ARGUMENT;
+                    return clearReport(&report, ERR_INVALID_ARGUMENT);
                 }
 
                 buffer += strlen("killed ");
@@ -574,7 +733,7 @@ report(ST_QLP *data)
 
                 if (!lenght)
                 {
-                    return ERR_INVALID_ARGUMENT;
+                    return clearReport(&report, ERR_INVALID_ARGUMENT);
                 }
 
                 lenght -= (unsigned long) buffer;
@@ -596,12 +755,12 @@ report(ST_QLP *data)
 
     if (retValue)
     {
-        return ERR_INVALID_ARGUMENT;
+        return clearReport(&report, ERR_INVALID_ARGUMENT);
     }
 
     cJSON_Delete(json);
 
-    return ERR_NONE;
+    return clearReport(&report, ERR_NONE);
 }
 
 /**
