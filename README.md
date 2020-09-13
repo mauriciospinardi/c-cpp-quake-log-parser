@@ -1,4 +1,4 @@
-# Hello from CloudWalk: Quake Log Parser
+# Hello to CloudWalk: Quake Log Parser
 
 Skills presentation for CloudWalk, Inc.  
 
