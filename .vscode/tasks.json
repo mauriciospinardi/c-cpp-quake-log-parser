@@ -32,7 +32,13 @@
         "type": "shell",
         "command": "& bash -c \"make -B\" & exit",
         "group": "build"
-     }
+      },
+      {
+        "label": "--run-unit-tests",
+        "type": "shell",
+        "command": "& bash -c \"make -B CFG_NAME=tests\" & exit",
+        "group": "test"
+      }
    ],
    "problemMatcher": {
       "owner": "cpp",

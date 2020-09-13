@@ -24,6 +24,11 @@ $(if $(CFG_NAME),$(CFG_NAME),release)
 PROJECT_NAME := \
 quake-log-parser
 
+ifeq ($(CFG_NAME),tests)
+PROJECT_NAME := \
+libqlp-unit-tests
+endif
+
 PROJECT_VERSION := \
 00.00.00
 
@@ -78,6 +83,11 @@ $(patsubst src/%,$(BUILD_DIR)/%.o,$(wildcard src/*.c*)) \
 $(patsubst src/libcjson/cJSON.c,$(BUILD_DIR)/cJSON.c.o,$(wildcard src/libcjson/cJSON.c)) \
 $(patsubst src/libqlp/%,$(BUILD_DIR)/%.o,$(wildcard src/libqlp/*.c*))
 
+ifeq ($(CFG_NAME),tests)
+OBJS := \
+$(subst main.c,tests.c,$(OBJS))
+endif
+
 # Building rules
 
 .PHONY: all
@@ -99,6 +109,10 @@ $(BUILD_DIR)/%.c.o: src/libcjson/%.c
 	@$(CC) -std=c89 $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.c.o: src/libqlp/%.c
+	@echo - compiling with gcc $<...
+	@$(CC) -std=c99 $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.c.o: tests/%.c
 	@echo - compiling with gcc $<...
 	@$(CC) -std=c99 $(CFLAGS) -c $< -o $@
 
