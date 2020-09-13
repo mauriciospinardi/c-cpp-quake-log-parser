@@ -304,9 +304,9 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     while (pointer)
     {
-        if (!strncmp(pointer->name, name, lenght)) /* Player already on the list */
+        if (!strncmp(pointer->name, name, lenght))
         {
-            return ERR_NONE;
+            return ERR_NONE; /* Player already on the list */
         }
 
         pointer = pointer->next;
@@ -314,7 +314,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     pointer = (ST_PLAYER_REPORT *) malloc(sizeof(ST_PLAYER_REPORT));
 
-    LIBQLP_MEMORY_CHECK(pointer);
+    UTILITIES_abort(!pointer);
 
     pointer->next = *list;
 
@@ -322,7 +322,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     pointer->name = (char *) malloc(sizeof(char) * (lenght + 1));
 
-    LIBQLP_MEMORY_CHECK(pointer->name);
+    UTILITIES_abort(!pointer->name);
 
     strncpy(pointer->name, name, lenght);
 
@@ -336,8 +336,8 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 /**
  * @brief @ref QLP_free()
  * 
- * @param[in,out] data ST_QLP variable
- * @param[in] error ERR_xxx
+ * @param data ST_QLP variable
+ * @param error ERR_xxx
  * 
  * @return int ERR_xxx
  */
@@ -408,8 +408,8 @@ clearQLP(ST_QLP *data, int error)
 /**
  * @brief @ref Safely deallocates memory from the given input.
  * 
- * @param[in,out] data ST_REPORT variable
- * @param[in] error ERR_xxx
+ * @param data ST_REPORT variable
+ * @param error ERR_xxx
  * 
  * @return int ERR_xxx
  */
@@ -488,17 +488,17 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     *json = cJSON_CreateObject();
 
-    LIBQLP_MEMORY_CHECK(*json);
+    UTILITIES_abort(!*json);
 
     for (i = 0; i < report->matchCount; i++)
     {
         object[0] = cJSON_CreateObject();
 
-        LIBQLP_MEMORY_CHECK(object[0]);
+        UTILITIES_abort(!object[0]);
 
         item[0] = cJSON_CreateNumber((double) report->matchReport[i].killCount);
 
-        LIBQLP_MEMORY_CHECK(item[0]);
+        UTILITIES_abort(!item[0]);
 
         cJSON_AddItemToObject(object[0], QLP_JSON_KEY_TOTAL_KILLS, item[0]);
 
@@ -508,23 +508,23 @@ createJSON(ST_REPORT *report, cJSON **json)
 
         array = cJSON_CreateArray();
 
-        LIBQLP_MEMORY_CHECK(array);
+        UTILITIES_abort(!array);
 
         object[1] = cJSON_CreateObject();
         
-        LIBQLP_MEMORY_CHECK(object[1]);
+        UTILITIES_abort(!object[1]);
 
         while (player)
         {
             item[0] = cJSON_CreateString(player->name);
 
-            LIBQLP_MEMORY_CHECK(item[0]);
+            UTILITIES_abort(!item[0]);
 
             cJSON_AddItemToArray(array, item[0]);
 
             item[1] = cJSON_CreateNumber(player->killCount);
 
-            LIBQLP_MEMORY_CHECK(item[1]);
+            UTILITIES_abort(!item[1]);
 
             cJSON_AddItemToObject(object[1], player->name, item[1]);
 
@@ -544,7 +544,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             item[1] = cJSON_CreateNumber(report->matchReport[i].meanOfDeath[j].killCount);
 
-            LIBQLP_MEMORY_CHECK(item[1]);
+            UTILITIES_abort(!item[1]);
 
             cJSON_AddItemToObject(object[2], report->matchReport[i].meanOfDeath[j].name, item[1]);
 
@@ -565,7 +565,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     stream = cJSON_Print(*json);
 
-    LIBQLP_MEMORY_CHECK(stream);
+    UTILITIES_abort(!stream);
 
     LIBQLP_PRINTF("%s", stream);
 
@@ -577,7 +577,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 /**
  * @brief @ref QLP_report()
  * 
- * @param[in,out] data parser file structure
+ * @param data parser file structure
  * 
  * @return int ERR_xxx
  */
@@ -616,7 +616,7 @@ report(ST_QLP *data)
 
     report.matchReport = (ST_MATCH_REPORT *) malloc(sizeof(ST_MATCH_REPORT) * report.matchCount);
 
-    LIBQLP_MEMORY_CHECK(report.matchReport);
+    UTILITIES_abort(!report.matchReport);
 
     memset(report.matchReport, 0, sizeof(ST_MATCH_REPORT) * report.matchCount);
 
@@ -624,7 +624,7 @@ report(ST_QLP *data)
     {
         report.matchReport[i].meanOfDeath = (ST_KILL_MEAN *) malloc(MEANS_OF_DEATH_LIST_SIZE);
 
-        LIBQLP_MEMORY_CHECK(report.matchReport[i].meanOfDeath);
+        UTILITIES_abort(!report.matchReport[i].meanOfDeath);
 
         memcpy(report.matchReport[i].meanOfDeath, meansOfDeath, MEANS_OF_DEATH_LIST_SIZE);
     }
@@ -819,14 +819,14 @@ updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count)
 
     while (list)
     {
-        if (strncmp(list->name, name, lenght)) /* Player found */
+        if (strncmp(list->name, name, lenght))
         {
             list = list->next;
 
             continue;
         }
 
-        list->killCount += count;
+        list->killCount += count; /* Player found */
 
         return ERR_NONE;
     }

@@ -74,7 +74,7 @@ LOG_evaluate(ST_LOG *data)
  * @param[in] file file name
  * @param[out] data log file structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 LOG_import(const char *file, ST_LOG *data)
@@ -97,7 +97,7 @@ LOG_import(const char *file, ST_LOG *data)
 /**
  * @brief @ref log.h
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 LOG_start(void)
@@ -126,7 +126,7 @@ LOG_start(void)
 /**
  * @brief @ref LOG_evaluate()
  * 
- * @param[in,out] data log file structure
+ * @param data log file structure
  * 
  * @return int ERR_xxx
  */
@@ -208,10 +208,10 @@ evaluate(ST_LOG *data)
 /**
  * @brief Returns a file size. Inherently not thread safe.
  *
- * @param[in] file file name
- * @param[out] fileSize file size
+ * @param file file name
+ * @param fileSize file size
  *
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 static int
 fsize(const char *file, long int *fileSize)
@@ -256,10 +256,10 @@ fsize(const char *file, long int *fileSize)
 /**
  * @brief @ref LOG_import()
  * 
- * @param[in] file file name
- * @param[out] data log file structure
+ * @param file file name
+ * @param data log file structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 static int
 import(const char *file, ST_LOG *data)

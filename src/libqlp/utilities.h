@@ -46,8 +46,9 @@ UTILITIES_start(void);
 /**
  * @brief Aborts execution with EXIT_FAILURE. For fatal errors only.
  * 
+ * @param[in] failure failure signal
  */
 extern void
-UTILITIES_abort(void);
+UTILITIES_abort(int failure);
 
 #endif /* #ifndef _UTILITIES_H_INCLUDED_ */

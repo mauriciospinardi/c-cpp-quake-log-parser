@@ -35,7 +35,7 @@ import(const char *stream, unsigned long size, ST_MATCH **data);
 /********************/
 
 /**
- * @brief Evaluates the content of a previously imported match stream.
+ * @brief @ref match.h
  * 
  * @param[in,out] data match file structure
  * 
@@ -65,13 +65,13 @@ MATCH_evaluate(ST_MATCH **data)
 }
 
 /**
- * @brief Imports a match stream.
+ * @brief @ref match.h
  *
  * @param[in] stream match buffer
  * @param[in] size size of match stream
  * @param[out] data match stream structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 MATCH_import(const char *stream, unsigned long size, ST_MATCH **data)
@@ -92,9 +92,9 @@ MATCH_import(const char *stream, unsigned long size, ST_MATCH **data)
 }
 
 /**
- * @brief Initializes the MATCH API.
+ * @brief @ref match.h
  *
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 MATCH_start(void)
@@ -123,7 +123,7 @@ MATCH_start(void)
 /**
  * @brief @ref MATCH_evaluate()
  * 
- * @param[in,out] data match file structure
+ * @param data match file structure
  * 
  * @return int ERR_xxx
  */
@@ -198,11 +198,11 @@ evaluate(ST_MATCH **data)
 /**
  * @brief @ref MATCH_import()
  * 
- * @param[in] stream match buffer
- * @param[in] size size of match stream
- * @param[out] data match stream structure
+ * @param stream match buffer
+ * @param size size of match stream
+ * @param data match stream structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 static int
 import(const char *stream, unsigned long size, ST_MATCH **data)

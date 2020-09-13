@@ -33,7 +33,7 @@ MATCH_evaluate(ST_MATCH **data);
  * @param[in] size size of match stream
  * @param[out] data match stream structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 MATCH_import(const char *stream, unsigned long size, ST_MATCH **data);
@@ -41,7 +41,7 @@ MATCH_import(const char *stream, unsigned long size, ST_MATCH **data);
 /**
  * @brief Initializes the MATCH API.
  *
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 MATCH_start(void);

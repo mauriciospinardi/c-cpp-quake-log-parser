@@ -32,7 +32,7 @@ LOG_evaluate(ST_LOG *data);
  * @param[in] file file name
  * @param[out] data log file structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 LOG_import(const char *file, ST_LOG *data);
@@ -40,7 +40,7 @@ LOG_import(const char *file, ST_LOG *data);
 /**
  * @brief Initializes the LOG API.
  *
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 LOG_start(void);

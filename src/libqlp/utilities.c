@@ -83,12 +83,16 @@ UTILITIES_start(void)
 /**
  * @brief @ref utilities.h
  * 
+ * @param[in] failure failure signal
  */
 extern void
-UTILITIES_abort(void)
+UTILITIES_abort(int failure)
 {
-    printf("\n    Error: internal abrupt abortion.");
-    printf("\n");
+    if (failure)
+    {
+        printf("\n    Error: internal abrupt abortion.");
+        printf("\n");
 
-    exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
+    }
 }

@@ -32,13 +32,13 @@ import(const char *stream, unsigned long size, ST_KILL **data);
 /********************/
 
 /**
- * @brief Imports a kill stream.
+ * @brief @ref kill.h
  *
  * @param[in] stream kill buffer
  * @param[in] size size of kill stream
  * @param[out] data kill stream structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 KILL_import(const char *stream, unsigned long size, ST_KILL **data)
@@ -59,9 +59,9 @@ KILL_import(const char *stream, unsigned long size, ST_KILL **data)
 }
 
 /**
- * @brief Initializes the KILL API.
+ * @brief @ref kill.h
  *
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 extern int
 KILL_start(void)
@@ -85,11 +85,11 @@ KILL_start(void)
 /**
  * @brief @ref KILL_import()
  * 
- * @param[in] stream kill buffer
- * @param[in] size size of kill stream
- * @param[out] data kill stream structure
+ * @param stream kill buffer
+ * @param size size of kill stream
+ * @param data kill stream structure
  * 
- * @return int ERR_NONE or ERR_xxx
+ * @return int ERR_xxx
  */
 static int
 import(const char *stream, unsigned long size, ST_KILL **data)

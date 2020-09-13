@@ -20,14 +20,6 @@
 /* Macros */
 /**********/
 
-#define LIBQLP_MEMORY_CHECK(arg) \
-{ \
-    if (!arg) \
-    { \
-        UTILITIES_abort(); \
-    } \
-}
-
 #ifdef _UNIT_TESTS_
 #define LIBQLP_PRINTF(...) /* NULL */
 #else
