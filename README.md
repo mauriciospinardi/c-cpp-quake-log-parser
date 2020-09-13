@@ -25,15 +25,15 @@ dependencies:
 - GNU Compiler Collection
 - The GNU version of the 'make' utility
 
-This repository was originally created and tested under Windows 10 Pro 2004
-19041.450.  
+Note: _This repository was originally created and tested under Windows 10 Pro 2004
+19041.450._  
 
 ## Build
 
 ### Defining the environment
 
 As pointed by the previous section, ```.\misc\env.bat``` defines the
-development environment. For that environemnt to be correctly set, in a new
+development environment. For that environment to be correctly set, in a new
 Command Prompt window, execute:  
 
 ```cmd
@@ -72,15 +72,15 @@ file ```./.vscode/tasks.json``` has:
 ```
 
 The ```"command"``` key above defines ```bash -c "make CFG_NAME=debug"```, used
-to trigger the compilation process in ```debug``` mode.  
+to trigger the build process in ```debug``` mode.  
 
 ## Execution and debugging
 
-The executable is built to ```./bin/<config>/*.exe``` and takes as input only
-one argument: a log file.  
+The executable is built to ```./bin/<config>/<name>.exe``` and takes as input
+only one argument: a log file.  
 
 - ```<config>``` can be either ```release``` or ```debug```.
-- ```*.exe``` references the ```PROJECT_NAME``` env. variable from the
+- ```<name>.exe``` references the ```PROJECT_NAME``` env. variable from the
   Makefile.
 - Path to the input can be either complete or relative to the executable path
   itself.
@@ -88,15 +88,15 @@ one argument: a log file.
 
 ### Unit tests
 
-Similarly to what is in the [Build commands](#build-commands) section, unit
-tests can be run by:
+Similarly to the [Build commands](#build-commands) section, unit tests can be
+triggered by:
 
 ```cmd
 <...\c-cpp-quake-log-parser>bash -c "make -B CFG_NAME=tests" && .\bin\tests\libqlp-unit-tests.exe
 ```
 
-An optional [Visual Studio Code](#visual-studio-code) integration is also
-available.
+Note: _An optional [Visual Studio Code](#visual-studio-code) integration is also
+available._
 
 ## Development notes
 
@@ -105,7 +105,7 @@ available.
   [robertpainsi](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53).
 - Source code was procedurally written in C (under the C99 standard).
 - Despite procedurally written, code has some characteristics usual to the
-  object oriented approach, as its hinted by the prefixes in libqlp's API:
+  object oriented approach, as it's hinted by the prefixes in libqlp's API:
     - \<"class"\>_\<"public method"\>
 - JSON data handling happens through Dave Gamble's
   [cJSON](https://github.com/DaveGamble/cJSON), under the MIT License.
