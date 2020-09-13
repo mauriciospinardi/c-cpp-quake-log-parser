@@ -30,7 +30,7 @@ libqlp-unit-tests
 endif
 
 PROJECT_VERSION := \
-00.00.00
+01.00.00
 
 BIN_DIR := \
 ./bin/$(CFG_NAME)
