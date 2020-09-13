@@ -283,10 +283,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     pointer = (ST_PLAYER_REPORT *) malloc(sizeof(ST_PLAYER_REPORT));
 
-    if (!pointer)
-    {
-        UTILITIES_abort();
-    }
+    LIBQLP_MEMORY_CHECK(pointer);
 
     pointer->next = *list;
 
@@ -294,10 +291,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     pointer->name = (char *) malloc(sizeof(char) * (lenght + 1));
 
-    if (!pointer->name)
-    {
-        UTILITIES_abort();
-    }
+    LIBQLP_MEMORY_CHECK(pointer->name);
 
     strncpy(pointer->name, name, lenght);
 
@@ -335,64 +329,43 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     *json = cJSON_CreateObject();
 
-    if (!*json)
-    {
-        UTILITIES_abort();
-    }
+    LIBQLP_MEMORY_CHECK(*json);
 
     for (i = 0; i < report->matchCount; i++)
     {
         object[0] = cJSON_CreateObject();
 
-        if (!object[0])
-        {
-            UTILITIES_abort();
-        }
+        LIBQLP_MEMORY_CHECK(object[0]);
 
         item[0] = cJSON_CreateNumber((double) report->matchReport[i].killCount);
 
-        if (!item[0])
-        {
-            UTILITIES_abort();
-        }
+        LIBQLP_MEMORY_CHECK(item[0]);
 
-        cJSON_AddItemToObject(object[0], "total_kills", item[0]);
+        cJSON_AddItemToObject(object[0], QLP_JSON_KEY_TOTAL_KILLS, item[0]);
 
-        sprintf(matchID, "game_%d", i + 1);
+        sprintf(matchID, QLP_JSON_KEY_GAME, i + 1);
 
         player = report->matchReport[i].player;
 
         array = cJSON_CreateArray();
 
-        if (!array)
-        {
-            UTILITIES_abort();
-        }
+        LIBQLP_MEMORY_CHECK(array);
 
         object[1] = cJSON_CreateObject();
         
-        if (!object[1])
-        {
-            UTILITIES_abort();
-        }
+        LIBQLP_MEMORY_CHECK(object[1]);
 
         while (player)
         {
             item[0] = cJSON_CreateString(player->name);
 
-            if (!item[0])
-            {
-                UTILITIES_abort();
-            }
+            LIBQLP_MEMORY_CHECK(item[0]);
 
             cJSON_AddItemToArray(array, item[0]);
 
-            item [1] = cJSON_CreateNumber(player->killCount);
+            item[1] = cJSON_CreateNumber(player->killCount);
 
-            if (!item[1])
-            {
-                UTILITIES_abort();
-            }
+            LIBQLP_MEMORY_CHECK(item[1]);
 
             cJSON_AddItemToObject(object[1], player->name, item[1]);
 
@@ -412,23 +385,20 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             item[1] = cJSON_CreateNumber(report->matchReport[i].meanOfDeath[j].killCount);
 
-            if (!item[1])
-            {
-                UTILITIES_abort();
-            }
+            LIBQLP_MEMORY_CHECK(item[1]);
 
             cJSON_AddItemToObject(object[2], report->matchReport[i].meanOfDeath[j].name, item[1]);
 
             includeMeans = 1;
         }
 
-        cJSON_AddItemToObject(object[0], "players", array);
+        cJSON_AddItemToObject(object[0], QLP_JSON_KEY_PLAYERS, array);
 
-        cJSON_AddItemToObject(object[0], "kills", object[1]);
+        cJSON_AddItemToObject(object[0], QLP_JSON_KEY_KILLS, object[1]);
 
         if (includeMeans)
         {
-            cJSON_AddItemToObject(object[0], "kills_by_means", object[2]);
+            cJSON_AddItemToObject(object[0], QLP_JSON_KEY_KILLS_BY_MEANS, object[2]);
         }
 
         cJSON_AddItemToObject(*json, matchID, object[0]);
@@ -436,10 +406,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     stream = cJSON_Print(*json);
 
-    if (!stream)
-    {
-        UTILITIES_abort();
-    }
+    LIBQLP_MEMORY_CHECK(stream);
 
     printf("%s", stream);
 
@@ -490,10 +457,7 @@ report(ST_QLP *data)
 
     report.matchReport = (ST_MATCH_REPORT *) malloc(sizeof(ST_MATCH_REPORT) * report.matchCount);
 
-    if (!report.matchReport)
-    {
-        UTILITIES_abort();
-    }
+    LIBQLP_MEMORY_CHECK(report.matchReport);
 
     memset(report.matchReport, 0, sizeof(ST_MATCH_REPORT) * report.matchCount);
 
@@ -501,10 +465,7 @@ report(ST_QLP *data)
     {
         report.matchReport[i].meanOfDeath = (ST_KILL_MEAN *) malloc(MEANS_OF_DEATH_LIST_SIZE);
 
-        if (!report.matchReport[i].meanOfDeath)
-        {
-            UTILITIES_abort();
-        }
+        LIBQLP_MEMORY_CHECK(report.matchReport[i].meanOfDeath);
 
         memcpy(report.matchReport[i].meanOfDeath, meansOfDeath, MEANS_OF_DEATH_LIST_SIZE);
     }

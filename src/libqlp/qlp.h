@@ -20,12 +20,25 @@
 /* Macros */
 /**********/
 
+#define LIBQLP_MEMORY_CHECK(arg) \
+{ \
+    if (!arg) \
+    { \
+        UTILITIES_abort(); \
+    } \
+}
+
 #ifdef _DEBUG_
 #define LIBQLP_TRACE(...) UTILITIES_log(__DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 #else
 #define LIBQLP_TRACE(...) /* NULL */
 #endif /* #ifdef _DEBUG_ */
 
+#define QLP_JSON_KEY_GAME "game_%d"
+#define QLP_JSON_KEY_KILLS "kills"
+#define QLP_JSON_KEY_KILLS_BY_MEANS "kills_by_means"
+#define QLP_JSON_KEY_PLAYERS "players"
+#define QLP_JSON_KEY_TOTAL_KILLS "total_kills"
 #define QLP_KEY_KILL "Kill:"
 #define QLP_KEY_MATCH "InitGame:"
 #define QLP_KEY_PLAYER "ClientUserinfoChanged:"
