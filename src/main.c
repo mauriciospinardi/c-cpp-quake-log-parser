@@ -83,17 +83,13 @@ int main(int argc, char *argv[])
 static void
 terminate(const char *executable, int error)
 {
-    printf("\nUsage: %s [file]", executable);
-
     if (!error)
     {
-        printf("\n    Success: [file].json generated");
-        printf("\n");
-
         exit(EXIT_SUCCESS);
     }
     else
     {
+        printf("\nUsage: %s [file]", executable);
         printf("\n    Error: %d", error);
         printf("\n");
 

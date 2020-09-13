@@ -29,6 +29,6 @@
 #define QLP_KEY_KILL "Kill:"
 #define QLP_KEY_MATCH "InitGame:"
 #define QLP_KEY_PLAYER "ClientUserinfoChanged:"
-#define QLP_KEY_WORLD "<world>"
+#define QLP_KEY_WORLD_PLAYER "<world>"
 
 #endif /* #ifndef _QLP_H_INCLUDED_ */

@@ -43,4 +43,11 @@ UTILITIES_log(const char *date, const char *time, const char *file, const int li
 extern int
 UTILITIES_start(void);
 
+/**
+ * @brief Aborts execution with EXIT_FAILURE. For fatal errors only.
+ * 
+ */
+extern void
+UTILITIES_abort(void);
+
 #endif /* #ifndef _UTILITIES_H_INCLUDED_ */

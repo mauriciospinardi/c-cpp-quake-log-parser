@@ -79,3 +79,16 @@ UTILITIES_start(void)
 
     return ERR_NONE;
 }
+
+/**
+ * @brief @ref utilities.h
+ * 
+ */
+extern void
+UTILITIES_abort(void)
+{
+    printf("\n    Error: internal abrupt abortion.");
+    printf("\n");
+
+    exit(EXIT_FAILURE);
+}

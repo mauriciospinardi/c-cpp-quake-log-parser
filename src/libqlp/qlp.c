@@ -16,9 +16,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**********/
+/* Macros */
+/**********/
+
+#define MEANS_OF_DEATH_LIST_SIZE ((int) (sizeof(ST_KILL_MEAN) * TOTAL_MEANS_OF_DEATH))
+
+#define TOTAL_MEANS_OF_DEATH ((int) (sizeof(meansOfDeath) / sizeof(ST_KILL_MEAN)))
+
 /********************/
 /* Type definitions */
 /********************/
+
+typedef struct KILL_MEAN
+{
+    char name[32];
+    int killCount;
+} ST_KILL_MEAN;
 
 typedef struct PLAYER_REPORT
 {
@@ -29,6 +43,7 @@ typedef struct PLAYER_REPORT
 
 typedef struct
 {
+    ST_KILL_MEAN *meanOfDeath;
     ST_PLAYER_REPORT *player;
     int killCount;
 } ST_MATCH_REPORT;
@@ -36,8 +51,45 @@ typedef struct
 typedef struct
 {
     int matchCount;
-    ST_MATCH_REPORT *matchReport; /* x matchCount */
+    ST_MATCH_REPORT *matchReport;
 } ST_REPORT;
+
+/**************/
+/* Constantes */
+/**************/
+
+static const ST_KILL_MEAN meansOfDeath[] =
+{
+    { "MOD_UNKNOWN", 0 },
+    { "MOD_SHOTGUN", 0 },
+    { "MOD_GAUNTLET", 0 },
+    { "MOD_MACHINEGUN", 0 },
+    { "MOD_GRENADE", 0 },
+    { "MOD_GRENADE_SPLASH", 0 },
+    { "MOD_ROCKET", 0 },
+    { "MOD_ROCKET_SPLASH", 0 },
+    { "MOD_PLASMA", 0 },
+    { "MOD_PLASMA_SPLASH", 0 },
+    { "MOD_RAILGUN", 0 },
+    { "MOD_LIGHTNING", 0 },
+    { "MOD_BFG", 0 },
+    { "MOD_BFG_SPLASH", 0 },
+    { "MOD_WATER", 0 },
+    { "MOD_SLIME", 0 },
+    { "MOD_LAVA", 0 },
+    { "MOD_CRUSH", 0 },
+    { "MOD_TELEFRAG", 0 },
+    { "MOD_FALLING", 0 },
+    { "MOD_SUICIDE", 0 },
+    { "MOD_TARGET_LASER", 0 },
+    { "MOD_TRIGGER_HURT", 0 },
+    { "MOD_NAIL", 0 },
+    { "MOD_CHAINGUN", 0 },
+    { "MOD_PROXIMITY_MINE", 0 },
+    { "MOD_KAMIKAZE", 0 },
+    { "MOD_JUICED", 0 },
+    { "MOD_GRAPPLE", 0 }
+};
 
 /********************/
 /* Global variables */
@@ -59,7 +111,7 @@ static int
 report(ST_QLP *data);
 
 static int
-saveReport(char *name, cJSON **json);
+updateMeanOfDeath(ST_KILL_MEAN *list, char *name);
 
 static int
 updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count);
@@ -212,7 +264,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, QLP_KEY_WORLD, lenght))
+    if (!strncmp(name, QLP_KEY_WORLD_PLAYER, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }
@@ -233,7 +285,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     if (!pointer)
     {
-        return ERR_OUT_OF_MEMORY;
+        UTILITIES_abort();
     }
 
     pointer->next = *list;
@@ -244,9 +296,7 @@ appendPlayer(ST_PLAYER_REPORT **list, char *name, int lenght)
 
     if (!pointer->name)
     {
-        free(pointer);
-
-        return ERR_OUT_OF_MEMORY;
+        UTILITIES_abort();
     }
 
     strncpy(pointer->name, name, lenght);
@@ -270,11 +320,13 @@ static int
 createJSON(ST_REPORT *report, cJSON **json)
 {
     ST_PLAYER_REPORT *player;
-    cJSON *item[2];
     cJSON *array;
+    cJSON *item[2];
     cJSON *object[3];
+    char *stream;
     char matchID[16];
-    int index;
+    int i, j;
+    int includeMeans;
 
     if (!report || !json)
     {
@@ -285,49 +337,43 @@ createJSON(ST_REPORT *report, cJSON **json)
 
     if (!*json)
     {
-        return ERR_OUT_OF_MEMORY;
+        UTILITIES_abort();
     }
 
-    for (index = 0; index < report->matchCount; index++)
+    for (i = 0; i < report->matchCount; i++)
     {
         object[0] = cJSON_CreateObject();
 
         if (!object[0])
         {
-            return ERR_OUT_OF_MEMORY;
+            UTILITIES_abort();
         }
 
-        item[0] = cJSON_CreateNumber((double) report->matchReport[index].killCount);
+        item[0] = cJSON_CreateNumber((double) report->matchReport[i].killCount);
 
         if (!item[0])
         {
-            cJSON_Delete(object[0]); cJSON_Delete(*json);
-
-            return ERR_OUT_OF_MEMORY;
+            UTILITIES_abort();
         }
 
         cJSON_AddItemToObject(object[0], "total_kills", item[0]);
 
-        sprintf(matchID, "game_%d", index + 1);
+        sprintf(matchID, "game_%d", i + 1);
 
-        player = report->matchReport[index].player;
+        player = report->matchReport[i].player;
 
         array = cJSON_CreateArray();
 
         if (!array)
         {
-            cJSON_Delete(item[0]); cJSON_Delete(object[0]); cJSON_Delete(*json);
-
-            return ERR_OUT_OF_MEMORY;
+            UTILITIES_abort();
         }
 
         object[1] = cJSON_CreateObject();
         
         if (!object[1])
         {
-            cJSON_Delete(array); cJSON_Delete(item[0]); cJSON_Delete(object[0]); cJSON_Delete(*json);
-
-            return ERR_OUT_OF_MEMORY;
+            UTILITIES_abort();
         }
 
         while (player)
@@ -336,11 +382,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             if (!item[0])
             {
-                cJSON_Delete(object[1]); cJSON_Delete(array); cJSON_Delete(item[0]);
-
-                cJSON_Delete(object[0]); cJSON_Delete(*json);
-
-                return ERR_OUT_OF_MEMORY;
+                UTILITIES_abort();
             }
 
             cJSON_AddItemToArray(array, item[0]);
@@ -349,11 +391,7 @@ createJSON(ST_REPORT *report, cJSON **json)
 
             if (!item[1])
             {
-                cJSON_Delete(object[1]); cJSON_Delete(array); cJSON_Delete(item[0]);
-
-                cJSON_Delete(object[0]); cJSON_Delete(*json);
-
-                return ERR_OUT_OF_MEMORY;
+                UTILITIES_abort();
             }
 
             cJSON_AddItemToObject(object[1], player->name, item[1]);
@@ -361,12 +399,51 @@ createJSON(ST_REPORT *report, cJSON **json)
             player = player->next;
         }
 
+        includeMeans = 0;
+
+        object[2] = cJSON_CreateObject();
+
+        for (j = (!object[2]) ? TOTAL_MEANS_OF_DEATH : 0; j < TOTAL_MEANS_OF_DEATH; j++)
+        {
+            if (!report->matchReport[i].meanOfDeath[j].killCount)
+            {
+                continue;
+            }
+
+            item[1] = cJSON_CreateNumber(report->matchReport[i].meanOfDeath[j].killCount);
+
+            if (!item[1])
+            {
+                UTILITIES_abort();
+            }
+
+            cJSON_AddItemToObject(object[2], report->matchReport[i].meanOfDeath[j].name, item[1]);
+
+            includeMeans = 1;
+        }
+
         cJSON_AddItemToObject(object[0], "players", array);
 
         cJSON_AddItemToObject(object[0], "kills", object[1]);
 
+        if (includeMeans)
+        {
+            cJSON_AddItemToObject(object[0], "kills_by_means", object[2]);
+        }
+
         cJSON_AddItemToObject(*json, matchID, object[0]);
     }
+
+    stream = cJSON_Print(*json);
+
+    if (!stream)
+    {
+        UTILITIES_abort();
+    }
+
+    printf("%s", stream);
+
+    free(stream);
 
     return ERR_NONE;
 }
@@ -386,7 +463,7 @@ report(ST_QLP *data)
     ST_REPORT report;
     cJSON *json;
     char *buffer;
-    int index;
+    int i;
     int retValue;
     unsigned long lenght;
 
@@ -415,14 +492,26 @@ report(ST_QLP *data)
 
     if (!report.matchReport)
     {
-        return ERR_OUT_OF_MEMORY;
+        UTILITIES_abort();
     }
 
     memset(report.matchReport, 0, sizeof(ST_MATCH_REPORT) * report.matchCount);
 
+    for (i = 0; i < report.matchCount; i++)
+    {
+        report.matchReport[i].meanOfDeath = (ST_KILL_MEAN *) malloc(MEANS_OF_DEATH_LIST_SIZE);
+
+        if (!report.matchReport[i].meanOfDeath)
+        {
+            UTILITIES_abort();
+        }
+
+        memcpy(report.matchReport[i].meanOfDeath, meansOfDeath, MEANS_OF_DEATH_LIST_SIZE);
+    }
+
     json = NULL;
 
-    index = 0;
+    i = 0;
 
     match = data->log.match;
 
@@ -436,7 +525,7 @@ report(ST_QLP *data)
 
             if (!buffer)
             {
-                if (!report.matchReport[index].player) /* No players found */
+                if (!report.matchReport[i].player) /* No players found */
                 {
                     return ERR_INVALID_ARGUMENT;
                 }
@@ -462,7 +551,7 @@ report(ST_QLP *data)
 
             lenght -= (unsigned long) buffer;
 
-            appendPlayer(&(report.matchReport[index].player), buffer, (int) lenght);
+            appendPlayer(&(report.matchReport[i].player), buffer, (int) lenght);
         }
 
         kill = match->kill;
@@ -494,13 +583,31 @@ report(ST_QLP *data)
 
             lenght -= (unsigned long) buffer;
 
-            if (strncmp(QLP_KEY_WORLD, buffer, lenght))
+            if (strncmp(QLP_KEY_WORLD_PLAYER, buffer, lenght))
             {
-                updatePlayer(report.matchReport[index].player, buffer, (int) lenght, 1);
+                updatePlayer(report.matchReport[i].player, buffer, (int) lenght, 1);
+
+                buffer = strstr(buffer, "by ");
+
+                if (!buffer)
+                {
+                    return ERR_INVALID_ARGUMENT;
+                }
+
+                buffer += 3; /* "by " */
+
+                updateMeanOfDeath(report.matchReport[i].meanOfDeath, buffer);
             }
             else
             {
-                buffer = strstr(buffer, "killed ") + strlen("killed ");
+                buffer = strstr(buffer, "killed ");
+
+                if (!buffer)
+                {
+                    return ERR_INVALID_ARGUMENT;
+                }
+
+                buffer += strlen("killed ");
 
                 lenght = (unsigned long) strstr(buffer, " by");
 
@@ -511,15 +618,15 @@ report(ST_QLP *data)
 
                 lenght -= (unsigned long) buffer;
 
-                updatePlayer(report.matchReport[index].player, buffer, (int) lenght, -1);
+                updatePlayer(report.matchReport[i].player, buffer, (int) lenght, -1);
             }
 
-            report.matchReport[index].killCount += 1;
+            report.matchReport[i].killCount += 1;
 
             kill = kill->next;
         }
 
-        index += 1;
+        i += 1;
 
         match = match->next;
     }
@@ -531,73 +638,40 @@ report(ST_QLP *data)
         return ERR_INVALID_ARGUMENT;
     }
 
-    return (saveReport(data->log.file, &json)) ? ERR_DEFAULT : ERR_NONE;
+    cJSON_Delete(json);
+
+    return ERR_NONE;
 }
 
 /**
- * @brief Saves a JSON file correspondent to the parsing of a previously
- * imported and evaluated log file.
- *
- * @param name log file name
- * @param json JSON stream previously built
+ * @brief Updates mean of death kill count.
+ * 
+ * @param list mean of death list
+ * @param name mean of death name
  * 
  * @return int ERR_xxx
  */
 static int
-saveReport(char *name, cJSON **json)
+updateMeanOfDeath(ST_KILL_MEAN *list, char *name)
 {
-    FILE *filePointer;
-    char *file;
-    char *stream;
-    int size;
+    int i;
 
-    if (!name || !json)
+    if (!list || !name)
     {
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!name[0])
+    for (i = 0; i < TOTAL_MEANS_OF_DEATH; i++)
     {
-        return ERR_INVALID_ARGUMENT;
+        if (!memcmp(list[i].name, name, strlen(list[i].name)))
+        {
+            list[i].killCount++;
+
+            return ERR_NONE;
+        }
     }
 
-    file = (char *) malloc(sizeof(char) * (strlen(name) + 1));
-
-    if (!file)
-    {
-        return ERR_OUT_OF_MEMORY;
-    }
-
-    strcpy(file, name);
-
-    strcat(file, ".json");
-
-    filePointer = fopen(file, "w+"); /* Will overwrite if exists */
-
-    if (!filePointer)
-    {
-        return ERR_DEFAULT;
-    }
-
-    stream = cJSON_Print(*json);
-
-    if (!stream)
-    {
-        return ERR_OUT_OF_MEMORY;
-    }
-
-    size = strlen(stream);
-
-    if (!fwrite(stream, sizeof(char), size, filePointer))
-    {
-        free(stream);
-
-        return ERR_DEFAULT;
-    }
-
-    free(stream);
-
-    return (fclose(filePointer)) ? ERR_DEFAULT : ERR_NONE;
+    return ERR_INVALID_ARGUMENT;
 }
 
 /**
@@ -618,7 +692,7 @@ updatePlayer(ST_PLAYER_REPORT *list, char *name, int lenght, int count)
         return ERR_INVALID_ARGUMENT;
     }
 
-    if (!strncmp(name, QLP_KEY_WORLD, lenght))
+    if (!strncmp(name, QLP_KEY_WORLD_PLAYER, lenght))
     {
         return ERR_INVALID_ARGUMENT;
     }
